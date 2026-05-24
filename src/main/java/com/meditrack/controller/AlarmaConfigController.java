@@ -5,6 +5,7 @@ import com.meditrack.dto.alarmaconfig.AlarmaConfigRequestDto;
 import com.meditrack.dto.alarmaconfig.AlarmaConfigResponseDto;
 import com.meditrack.model.EstadoAlarma;
 import com.meditrack.service.AlarmaConfigService;
+import com.meditrack.service.AlarmaService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +19,11 @@ import java.util.List;
 public class AlarmaConfigController {
 
     private final AlarmaConfigService alarmaConfigService;
+    private final AlarmaService alarmaService;
 
-    public AlarmaConfigController(AlarmaConfigService alarmaConfigService) {
+    public AlarmaConfigController(AlarmaConfigService alarmaConfigService, AlarmaService alarmaService) {
         this.alarmaConfigService = alarmaConfigService;
+        this.alarmaService = alarmaService;
     }
 
     @PostMapping("/crear")
@@ -54,7 +57,7 @@ public class AlarmaConfigController {
             Principal principal
     ) {
         return ResponseEntity.ok(
-                alarmaConfigService.obtenerAlarmasDelDia(
+                alarmaService.obtenerAlarmasDelDia(
                         principal.getName(),
                         pacienteId
                 )
@@ -78,7 +81,7 @@ public class AlarmaConfigController {
             @RequestParam EstadoAlarma estado,
             Principal principal
     ) {
-        alarmaConfigService.actualizarEstado(id, estado, principal.getName());
+        alarmaService.actualizarEstado(id, estado, principal.getName());
         return ResponseEntity.ok().build();
     }
 
@@ -116,7 +119,7 @@ public class AlarmaConfigController {
             Principal principal
     ) {
         return ResponseEntity.ok(
-                alarmaConfigService.obtenerHistorial(
+                alarmaService.obtenerHistorial(
                         principal.getName(),
                         pacienteId,
                         fechaInicio,

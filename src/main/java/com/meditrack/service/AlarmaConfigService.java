@@ -1,10 +1,8 @@
 package com.meditrack.service;
 
-import com.meditrack.dto.alarma.AlarmaResponseDto;
 import com.meditrack.dto.alarmaconfig.AlarmaConfigRequestDto;
 import com.meditrack.dto.alarmaconfig.AlarmaConfigResponseDto;
 import com.meditrack.exception.BadRequestException;
-import com.meditrack.exception.NotFoundException;
 import com.meditrack.validation.DtoValidator;
 import com.meditrack.validation.EntidadValidator;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +13,6 @@ import com.meditrack.repository.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -29,6 +26,10 @@ public class AlarmaConfigService {
     private final AlarmaRepository alarmaRepository;
     private final EntidadValidator entidadValidator;
     private final DtoValidator dtoValidator;
+
+    private static final ZoneId ZONA_HORARIA = ZoneId.of("America/Mexico_City");
+    private static final int MAX_ALARMAS = 1000;
+
     /**
      * Crea una configuración de alarma y genera automáticamente
      * las alarmas correspondientes.
@@ -39,7 +40,7 @@ public class AlarmaConfigService {
             String phoneNumber
     ) {
 
-        LocalDateTime ahora = LocalDateTime.now(ZoneId.of("America/Mexico_City"));
+        LocalDateTime ahora = LocalDateTime.now(ZONA_HORARIA);
 
         dtoValidator.validarDto(dto);
 
@@ -73,13 +74,12 @@ public class AlarmaConfigService {
         LocalDateTime fechaFin = config.getFechaFin();
         int frecuenciaHoras = config.getFrecuenciaHoras();
 
-        int maxAlarmas = 1000;
-        long minutos = Duration.between(fechaInicio, fechaFin).toMinutes();
+            long minutos = Duration.between(fechaInicio, fechaFin).toMinutes();
         long frecuenciaEnMinutos = frecuenciaHoras * 60L;
 
         long total = (long) Math.ceil((double) minutos / frecuenciaEnMinutos) + 1;
 
-        if (total > maxAlarmas) {
+        if (total > MAX_ALARMAS) {
             throw new BadRequestException(
                     "El rango genera demasiadas alarmas, " +
                             "reduce el periodo o aumenta la frecuencia"
@@ -125,39 +125,6 @@ public class AlarmaConfigService {
     }
 
     @Transactional(readOnly = true)
-    public List<AlarmaResponseDto> obtenerAlarmasDelDia(
-            String phoneNumber,
-            Long pacienteId
-    ) {
-        User user = entidadValidator.usuario(phoneNumber);
-        Paciente paciente = entidadValidator.resolverPaciente(user, pacienteId);
-
-        ZoneId zone = ZoneId.of("America/Mexico_City");
-
-        LocalDateTime inicio = LocalDate.now(zone).atStartOfDay();
-        LocalDateTime fin = LocalDate.now(zone).atTime(23, 59, 59, 999999999);
-
-        List<Alarma> alarmas = alarmaRepository.findAlarmasDelDia(
-                paciente.getId(),
-                inicio,
-                fin
-        );
-
-        return alarmas.stream()
-                .map(a -> new AlarmaResponseDto(
-                        a.getId(),
-                        a.getAlarmaConfig().getId(),
-                        a.getMedicina().getId(),
-                        a.getMedicina().getNombre(),
-                        a.getMedicina().getDosageForm(),
-                        a.getFechaHora(),
-                        a.getEstado(),
-                        a.isNotificada()
-                ))
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
     public List<AlarmaConfigResponseDto> obtenerPorMedicinaId(
             Long medicinaId,
             String phoneNumber,
@@ -186,7 +153,7 @@ public class AlarmaConfigService {
             String phoneNumber
     ) {
 
-        LocalDateTime ahora = LocalDateTime.now(ZoneId.of("America/Mexico_City"));
+        LocalDateTime ahora = LocalDateTime.now(ZONA_HORARIA);
         dtoValidator.validarDto(dto);
 
         User user = entidadValidator.usuario(phoneNumber);
@@ -228,70 +195,11 @@ public class AlarmaConfigService {
             throw new BadRequestException("La configuración ya está eliminada");
         }
         config.setActivo(false);
-        LocalDateTime ahora = LocalDateTime.now(ZoneId.of("America/Mexico_City"));
+        LocalDateTime ahora = LocalDateTime.now(ZONA_HORARIA);
 
         config.setActualizado(ahora);
 
         // eliminar futuras alarmas
         alarmaRepository.deleteByAlarmaConfigIdAndFechaHoraGreaterThanEqual(configId, ahora);
-    }
-
-    @Transactional
-    public void actualizarEstado(Long alarmaId, EstadoAlarma estado, String phoneNumber) {
-        User user = entidadValidator.usuario(phoneNumber);
-
-        Alarma alarma = alarmaRepository.findById(alarmaId)
-                .orElseThrow(() -> new NotFoundException("Alarma no encontrada"));
-
-        entidadValidator.configValida(alarma.getAlarmaConfig().getId(), user);
-
-        if (!alarma.getAlarmaConfig().isActivo()) {
-            throw new BadRequestException("La alarma pertenece a una configuración inactiva");
-        }
-
-        alarma.setEstado(estado);
-        alarma.setNotificada(true);
-    }
-
-    @Transactional(readOnly = true)
-    public List<AlarmaResponseDto> obtenerHistorial(
-            String phoneNumber,
-            Long pacienteId,
-            LocalDate fechaInicio,
-            LocalDate fechaFin
-    ) {
-        User user = entidadValidator.usuario(phoneNumber);
-        Paciente paciente = entidadValidator.resolverPaciente(user, pacienteId);
-
-        ZoneId zone = ZoneId.of("America/Mexico_City");
-
-        LocalDateTime inicio = (fechaInicio != null
-                ? fechaInicio
-                : LocalDate.now(zone).minusDays(6))
-                .atStartOfDay();
-
-        LocalDateTime fin = (fechaFin != null
-                ? fechaFin
-                : LocalDate.now(zone))
-                .atTime(23, 59, 59, 999999999);
-
-        List<Alarma> alarmas = alarmaRepository.findHistorial(
-                paciente.getId(),
-                inicio,
-                fin
-        );
-
-        return alarmas.stream()
-                .map(a -> new AlarmaResponseDto(
-                        a.getId(),
-                        a.getAlarmaConfig().getId(),
-                        a.getMedicina().getId(),
-                        a.getMedicina().getNombre(),
-                        a.getMedicina().getDosageForm(),
-                        a.getFechaHora(),
-                        a.getEstado(),
-                        a.isNotificada()
-                ))
-                .toList();
     }
 }
