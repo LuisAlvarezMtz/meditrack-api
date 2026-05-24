@@ -4,9 +4,9 @@ import com.meditrack.exception.BadRequestException;
 import com.meditrack.exception.ForbiddenException;
 import com.meditrack.exception.NotFoundException;
 import com.meditrack.model.*;
-import com.meditrack.repository.AlarmaConfigRepository;
-import com.meditrack.repository.MedicinaRepository;
-import com.meditrack.repository.PacienteRepository;
+import com.meditrack.repository.AlarmConfigRepository;
+import com.meditrack.repository.MedicineRepository;
+import com.meditrack.repository.PatientRepository;
 import com.meditrack.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -15,95 +15,95 @@ import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
-public class EntidadValidator {
+public class EntityValidator {
 
     private final UserRepository userRepository;
-    private final MedicinaRepository medicinaRepository;
-    private final AlarmaConfigRepository alarmaConfigRepository;
-    private final PacienteRepository pacienteRepository;
+    private final MedicineRepository medicineRepository;
+    private final AlarmConfigRepository alarmConfigRepository;
+    private final PatientRepository patientRepository;
 
-    public User usuario(String phoneNumber) {
+    public User getUser(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
-    public Patient paciente(String phoneNumber) {
-        User user = usuario(phoneNumber);
+    public Patient getPatient(String phoneNumber) {
+        User user = getUser(phoneNumber);
 
         if (user.getRole() != Role.PATIENT) {
-            throw new ForbiddenException("Solo pacientes pueden realizar esta acción");
+            throw new ForbiddenException("Only patients can perform this action");
         }
         return user.getPatient();
     }
 
-    public Medicine medicinaValida(Long medicinaId, Patient patient) {
-        Medicine medicine = medicinaRepository.findById(medicinaId)
-                .orElseThrow(() -> new NotFoundException("Medicine no encontrada"));
+    public Medicine validateMedicine(Long medicineId, Patient patient) {
+        Medicine medicine = medicineRepository.findById(medicineId)
+                .orElseThrow(() -> new NotFoundException("Medicine not found"));
 
         if (!medicine.getPatient().getId().equals(patient.getId())) {
-            throw new ForbiddenException("No tienes acceso a esta medicine");
+            throw new ForbiddenException("You do not have access to this medicine");
         }
 
         return medicine;
     }
 
-    public AlarmConfig configValida(Long configId, User user) {
+    public AlarmConfig validateConfig(Long configId, User user) {
 
-        AlarmConfig config = alarmaConfigRepository.findById(configId)
-                .orElseThrow(() -> new NotFoundException("Config no encontrada"));
+        AlarmConfig config = alarmConfigRepository.findById(configId)
+                .orElseThrow(() -> new NotFoundException("Config not found"));
 
         Patient patient = config.getPatient();
 
         if (user.getRole() == Role.PATIENT) {
             if (!patient.getUser().getId().equals(user.getId())) {
-                throw new ForbiddenException("No tienes acceso a esta configuración");
+                throw new ForbiddenException("You do not have access to this configuration");
             }
         }
 
         if (user.getRole() == Role.CAREGIVER) {
-            boolean vinculado = user.getCaregiver().getPatients().stream()
+            boolean linked = user.getCaregiver().getPatients().stream()
                     .anyMatch(p -> p.getId().equals(patient.getId()));
 
-            if (!vinculado) {
-                throw new ForbiddenException("Patient no vinculado");
+            if (!linked) {
+                throw new ForbiddenException("Patient not linked");
             }
         }
 
         return config;
     }
 
-    public Patient pacienteValidoParaUser(Long pacienteId, User user) {
-        Patient patient = pacienteRepository.findById(pacienteId)
-                .orElseThrow(() -> new NotFoundException("Patient no encontrado"));
+    public Patient validatePatientForUser(Long patientId, User user) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new NotFoundException("Patient not found"));
 
-        validarAcceso(patient, user);
+        validateAccess(patient, user);
 
         return patient;
     }
 
 
-    public Patient resolverPaciente(User user, Long pacienteId) {
+    public Patient resolvePatient(User user, Long patientId) {
         if (user.getRole() == Role.PATIENT) {
             return user.getPatient();
         }
 
-        if (pacienteId == null) {
-            throw new BadRequestException("Debe especificar pacienteId");
+        if (patientId == null) {
+            throw new BadRequestException("Must specify patientId");
         }
 
-        return pacienteValidoParaUser(pacienteId, user);
+        return validatePatientForUser(patientId, user);
     }
 
-    public void validarAcceso(Patient patient, User user) {
+    public void validateAccess(Patient patient, User user) {
         if (user.getRole() == Role.PATIENT) {
             if (!Objects.equals(patient.getUser().getId(), user.getId()))
-                throw new ForbiddenException("No puedes gestionar alarmas de otro patient");
+                throw new ForbiddenException("You cannot manage alarms for another patient");
         }
         if (user.getRole() == Role.CAREGIVER) {
-            boolean vinculado = user.getCaregiver().getPatients().stream()
+            boolean linked = user.getCaregiver().getPatients().stream()
                     .anyMatch(p -> p.getId().equals(patient.getId()));
-            if (!vinculado)
-                throw new ForbiddenException("Patient no vinculado al cuidador");
+            if (!linked)
+                throw new ForbiddenException("Patient not linked to caregiver");
         }
     }
 }

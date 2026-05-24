@@ -25,7 +25,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public Map<String, String> acceder(User user) {
+    public Map<String, String> login(User user) {
         Authentication authentication =
                 authManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
@@ -36,7 +36,7 @@ public class UserService {
 
         if (authentication.isAuthenticated()) {
             User userBD = userRepository.findByPhoneNumber(user.getPhoneNumber())
-                    .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+                    .orElseThrow(() -> new NotFoundException("User not found"));
             String accessToken = jwtService.generateToken(userBD);
             String refreshToken = jwtService.generateRefreshToken(userBD);
             return Map.of(
@@ -44,17 +44,17 @@ public class UserService {
                     "refreshToken", refreshToken
             );
         }
-        throw new BadRequestException("Credenciales incorrectas");
+        throw new BadRequestException("Invalid credentials");
     }
 
     public String refreshAccessToken(String refreshToken) {
         try {
-            String telefono = jwtService.extractPhoneNumber(refreshToken);
-            User user = userRepository.findByPhoneNumber(telefono)
-                    .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+            String phoneNumber = jwtService.extractPhoneNumber(refreshToken);
+            User user = userRepository.findByPhoneNumber(phoneNumber)
+                    .orElseThrow(() -> new NotFoundException("User not found"));
 
             if (!jwtService.validateToken(refreshToken)) {
-                throw new BadRequestException("Refresh token inválido o expirado");
+                throw new BadRequestException("Invalid or expired refresh token");
             }
 
             return jwtService.generateToken(user);
@@ -62,7 +62,7 @@ public class UserService {
         }catch (BadRequestException | NotFoundException e) {
         throw e;
         } catch (Exception e) {
-        throw new BadRequestException("Error al refrescar token");
+        throw new BadRequestException("Error refreshing token");
         }
     }
 }

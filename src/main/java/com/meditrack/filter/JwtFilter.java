@@ -43,7 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             String username = jwtService.extractPhoneNumber(token);
-            String rol = jwtService.extractRol(token);
+            String rol = jwtService.extractRole(token);
 
             if (username != null &&
                     SecurityContextHolder.getContext().getAuthentication() == null &&

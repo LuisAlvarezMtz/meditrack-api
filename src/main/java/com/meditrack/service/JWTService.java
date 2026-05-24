@@ -50,8 +50,8 @@ public class JWTService {
 
 
 
-    public String extractRol(String token) {
-        return extractClaim(token, claims -> claims.get("rol", String.class));
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
 
