@@ -3,6 +3,10 @@ package com.meditrack.service;
 import com.meditrack.dto.auth.AuthResponseDto;
 import com.meditrack.dto.cuidador.CuidadorInfoDto;
 import com.meditrack.dto.paciente.*;
+import com.meditrack.exception.BadRequestException;
+import com.meditrack.exception.ConflictException;
+import com.meditrack.exception.ForbiddenException;
+import com.meditrack.exception.NotFoundException;
 import com.meditrack.mapper.PacienteMapper;
 import com.meditrack.model.Cuidador;
 import com.meditrack.model.Paciente;
@@ -10,10 +14,8 @@ import com.meditrack.model.User;
 import com.meditrack.repository.CuidadorRepository;
 import com.meditrack.repository.PacienteRepository;
 import com.meditrack.repository.UserRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -38,10 +40,7 @@ public class PacienteService {
     public AuthResponseDto registrar(RequestPacienteDto dto) {
         Optional<User> existente = userRepo.findByPhoneNumber(dto.getPhoneNumber());
         if (existente.isPresent()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "El teléfono ya está registrado"
-            );
+            throw new ConflictException("El teléfono ya está registrado");
         }
         Cuidador cuidador = null;
         Paciente paciente = PacienteMapper.toEntity(dto, cuidador);
@@ -61,19 +60,13 @@ public class PacienteService {
         Paciente paciente = userRepo.findByPhoneNumber(phoneNumberPaciente)
                 .map(User::getPaciente)
                 .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Paciente no encontrado"));
+                        new NotFoundException("Paciente no encontrado"));
         Cuidador cuidador = cuidadorRepository.findByCodigoVinculacion(codigo)
                 .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.BAD_REQUEST,
-                                "Código de cuidador no válido"));
-        if (paciente.getCuidador() != null) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "El paciente ya está vinculado a un cuidador");
-        }
+                        new BadRequestException("Código de cuidador no válido"));
+
+        if (paciente.getCuidador() != null) throw new ForbiddenException("El paciente ya está vinculado a un cuidador");
+
         paciente.setCuidador(cuidador);
         pacienteRepository.save(paciente);
     }
@@ -82,8 +75,7 @@ public class PacienteService {
     public CuidadorInfoDto buscarCuidadorPorCodigo(String codigo) {
         Cuidador cuidador = cuidadorRepository
                 .findByCodigoVinculacion(codigo).orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Código de cuidador no válido"));
+                        new BadRequestException("Código de cuidador no válido"));
         return new CuidadorInfoDto(
                 cuidador.getUser().getName(),
                 cuidador.getUser().getPhoneNumber());
@@ -92,22 +84,22 @@ public class PacienteService {
     public void desvincularCuidador(String phoneNumber) {
         User user = userRepo.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() ->
-                        new RuntimeException("Usuario no encontrado"));
+                        new NotFoundException("Usuario no encontrado"));
         Paciente paciente = user.getPaciente();
         if (paciente == null)
-            throw new RuntimeException("El usuario no es un paciente");
+            throw new ForbiddenException("El usuario no es un paciente");
         if (paciente.getCuidador() == null)
-            throw new RuntimeException("El paciente no tiene cuidador vinculado");
+            throw new ForbiddenException("El paciente no tiene cuidador vinculado");
         paciente.setCuidador(null);
         pacienteRepository.save(paciente);
     }
 
     public ResponsePacienteDto obtenerPerfil(String phoneNumberUsuarioActual) {
         User user = userRepo.findByPhoneNumber(phoneNumberUsuarioActual)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
         Paciente paciente = pacienteRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado para este usuario"));
+                .orElseThrow(() -> new NotFoundException("Paciente no encontrado para este usuario"));
 
         return PacienteMapper.toResponse(paciente);
     }
@@ -116,13 +108,13 @@ public class PacienteService {
     public void cambiarCuidador(String phoneNumber, String codigoCuidador) {
         User user = userRepo.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() ->
-                        new RuntimeException("Usuario no encontrado"));
+                        new NotFoundException("Usuario no encontrado"));
         Paciente paciente = user.getPaciente();
         if (paciente == null)
-            throw new RuntimeException("El usuario no es un paciente");
+            throw new ForbiddenException("El usuario no es un paciente");
         Cuidador cuidador = cuidadorRepository
                 .findByCodigoVinculacion(codigoCuidador)
-                .orElseThrow(() -> new RuntimeException("Cuidador no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Cuidador no encontrado"));
         paciente.setCuidador(cuidador);
         pacienteRepository.save(paciente);
     }
@@ -147,7 +139,7 @@ public class PacienteService {
 
         Paciente paciente = pacienteRepository
                 .findByUserPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Paciente no encontrado"));
 
         validarCambioTelefono(paciente, dto.getPhoneNumber());
 
@@ -177,12 +169,8 @@ public class PacienteService {
             if (existente != null &&
                     !existente.getId().equals(paciente.getUser().getId())) {
 
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "El teléfono ya está registrado"
-                );
+                throw new ConflictException("El teléfono ya está registrado");
             }
         }
     }
-
 }
