@@ -2,6 +2,8 @@ package com.meditrack.service;
 
 import com.meditrack.dto.medicina.RequestMedicinaDto;
 import com.meditrack.dto.medicina.ResponseMedicinaDto;
+import com.meditrack.exception.ForbiddenException;
+import com.meditrack.exception.NotFoundException;
 import com.meditrack.mapper.MedicinaMapper;
 import com.meditrack.model.*;
 import com.meditrack.repository.MedicinaRepository;
@@ -37,10 +39,10 @@ public class MedicinaService {
 
     public List<ResponseMedicinaDto> obtenerMedicinasDelPaciente(String phoneNumber) {
         User user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
         if (user.getRol() != Rol.PACIENTE) {
-            throw new RuntimeException("Solo los pacientes pueden usar este método");
+            throw new ForbiddenException("Solo los pacientes pueden usar este método");
         }
 
         Paciente paciente = user.getPaciente();
@@ -54,10 +56,10 @@ public class MedicinaService {
 
     public List<ResponseMedicinaDto> obtenerMedicinasDePaciente(Long pacienteId, String phonNumberCuidador) {
         User user = userRepository.findByPhoneNumber(phonNumberCuidador)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
         if (user.getRol() != Rol.CUIDADOR) {
-            throw new RuntimeException("Solo los cuidadores pueden ver medicinas de pacientes");
+            throw new ForbiddenException("Solo los cuidadores pueden ver medicinas de pacientes");
         }
 
         Cuidador cuidador = user.getCuidador();
@@ -66,13 +68,13 @@ public class MedicinaService {
                 .anyMatch(p -> p.getId().equals(pacienteId));
 
         if (!esPacienteVinculado) {
-            throw new RuntimeException("No puedes ver medicinas de un paciente no vinculado");
+            throw new ForbiddenException("No puedes ver medicinas de un paciente no vinculado");
         }
 
         Paciente paciente = cuidador.getPacientes().stream()
                 .filter(p -> p.getId().equals(pacienteId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Paciente no encontrado"));
 
         List<Medicina> medicinas = medicinaRepository.findByPacienteAndEstado(paciente, Estado.ACTIVO);
 
@@ -83,7 +85,7 @@ public class MedicinaService {
 
     public ResponseMedicinaDto obtenerPorId(Long id, String phoneNumber) {
         Medicina medicina = medicinaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medicina no encontrada"));
+                .orElseThrow(() -> new NotFoundException("Medicina no encontrada"));
 
         validarAcceso(medicina.getPaciente(), phoneNumber);
 
@@ -92,7 +94,7 @@ public class MedicinaService {
 
     public ResponseMedicinaDto actualizarMedicina(Long id, RequestMedicinaDto dto, String phoneNumber) {
         Medicina medicina = medicinaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medicina no encontrada"));
+                .orElseThrow(() -> new NotFoundException("Medicina no encontrada"));
 
         validarAcceso(medicina.getPaciente(), phoneNumber);
 
@@ -107,7 +109,7 @@ public class MedicinaService {
     @Transactional
     public void desactivarMedicina(Long id, String phoneNumber) {
         Medicina medicina = medicinaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medicina no encontrada"));
+                .orElseThrow(() -> new NotFoundException("Medicina no encontrada"));
 
         validarAcceso(medicina.getPaciente(), phoneNumber);
 
