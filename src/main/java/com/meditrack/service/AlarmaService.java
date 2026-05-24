@@ -1,6 +1,6 @@
 package com.meditrack.service;
 
-import com.meditrack.dto.alarma.AlarmaResponseDto;
+import com.meditrack.dto.alarm.AlarmResponseDto;
 import com.meditrack.exception.BadRequestException;
 import com.meditrack.exception.NotFoundException;
 import com.meditrack.validation.EntidadValidator;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.meditrack.model.*;
 import com.meditrack.repository.*;
 import org.springframework.transaction.annotation.Transactional;
-import com.meditrack.mapper.AlarmaMapper;
+import com.meditrack.mapper.AlarmMapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ public class AlarmaService {
     private static final ZoneId ZONA_HORARIA = ZoneId.of("America/Mexico_City");
 
     @Transactional(readOnly = true)
-    public List<AlarmaResponseDto> obtenerAlarmasDelDia(
+    public List<AlarmResponseDto> obtenerAlarmasDelDia(
             String phoneNumber,
             Long pacienteId
     ) {
@@ -43,7 +43,7 @@ public class AlarmaService {
         );
 
         return alarms.stream()
-                .map(AlarmaMapper::toResponseDto)
+                .map(AlarmMapper::toResponseDto)
                 .toList();
     }
 
@@ -65,7 +65,7 @@ public class AlarmaService {
     }
 
     @Transactional(readOnly = true)
-    public List<AlarmaResponseDto> obtenerHistorial(
+    public List<AlarmResponseDto> obtenerHistorial(
             String phoneNumber,
             Long pacienteId,
             LocalDate fechaInicio,
@@ -91,7 +91,7 @@ public class AlarmaService {
         );
 
         return alarms.stream()
-                .map(AlarmaMapper::toResponseDto)
+                .map(AlarmMapper::toResponseDto)
                 .toList();
     }
 }

@@ -1,7 +1,7 @@
 package com.meditrack.service;
 
-import com.meditrack.dto.alarmaconfig.AlarmaConfigRequestDto;
-import com.meditrack.dto.alarmaconfig.AlarmaConfigResponseDto;
+import com.meditrack.dto.alarmconfig.AlarmConfigRequestDto;
+import com.meditrack.dto.alarmconfig.AlarmConfigResponseDto;
 import com.meditrack.exception.BadRequestException;
 import com.meditrack.validation.DtoValidator;
 import com.meditrack.validation.EntidadValidator;
@@ -35,8 +35,8 @@ public class AlarmaConfigService {
      * las alarmas correspondientes.
      */
     @Transactional
-    public AlarmaConfigResponseDto crear(
-            AlarmaConfigRequestDto dto,
+    public AlarmConfigResponseDto crear(
+            AlarmConfigRequestDto dto,
             String phoneNumber
     ) {
 
@@ -109,7 +109,7 @@ public class AlarmaConfigService {
      * Obtiene todas las configuraciones activas de un paciente.
      */
     @Transactional(readOnly = true)
-    public List<AlarmaConfigResponseDto> obtenerPorPaciente(
+    public List<AlarmConfigResponseDto> obtenerPorPaciente(
             String phoneNumber,
             Long pacienteId
     ) {
@@ -125,7 +125,7 @@ public class AlarmaConfigService {
     }
 
     @Transactional(readOnly = true)
-    public List<AlarmaConfigResponseDto> obtenerPorMedicinaId(
+    public List<AlarmConfigResponseDto> obtenerPorMedicinaId(
             Long medicinaId,
             String phoneNumber,
             Long pacienteId
@@ -147,9 +147,9 @@ public class AlarmaConfigService {
     }
 
     @Transactional
-    public AlarmaConfigResponseDto actualizar(
+    public AlarmConfigResponseDto actualizar(
             Long configId,
-            AlarmaConfigRequestDto dto,
+            AlarmConfigRequestDto dto,
             String phoneNumber
     ) {
 

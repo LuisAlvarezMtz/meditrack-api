@@ -1,8 +1,9 @@
 package com.meditrack.controller;
 
-import com.meditrack.dto.medicina.RequestMedicinaDto;
-import com.meditrack.dto.medicina.ResponseMedicinaDto;
+import com.meditrack.dto.medicine.RequestMedicineDto;
+import com.meditrack.dto.medicine.ResponseMedicineDto;
 import com.meditrack.service.MedicinaService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,18 +21,18 @@ public class MedicinaController {
     }
 
     @PostMapping("/registrar")
-    public ResponseEntity<ResponseMedicinaDto> registrar(
-            @RequestBody RequestMedicinaDto dto,
+    public ResponseEntity<ResponseMedicineDto> registrar(
+            @Valid @RequestBody RequestMedicineDto dto,
             Principal principal) {
 
-        ResponseMedicinaDto response =
+        ResponseMedicineDto response =
                 medicinaService.registrarMedicina(dto, principal.getName());
         return ResponseEntity.ok(response);
     }
 
     //Patient ve sus medicinas
     @GetMapping("/mias")
-    public ResponseEntity<List<ResponseMedicinaDto>> obtenerMisMedicinas
+    public ResponseEntity<List<ResponseMedicineDto>> obtenerMisMedicinas
         (Principal principal) {
             return ResponseEntity.ok
                 (medicinaService.
@@ -40,7 +41,7 @@ public class MedicinaController {
 
     //Caregiver ve las de un paciente vinculado
     @GetMapping("/paciente/{id}")
-    public ResponseEntity<List<ResponseMedicinaDto>> obtenerMedicinasPaciente(
+    public ResponseEntity<List<ResponseMedicineDto>> obtenerMedicinasPaciente(
             @PathVariable Long id,
             Principal principal) {
         return ResponseEntity.ok(medicinaService.
@@ -48,7 +49,7 @@ public class MedicinaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseMedicinaDto> obtenerPorId(
+    public ResponseEntity<ResponseMedicineDto> obtenerPorId(
             @PathVariable Long id,
             Principal principal) {
 
@@ -58,9 +59,9 @@ public class MedicinaController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseMedicinaDto> actualizar(
+    public ResponseEntity<ResponseMedicineDto> actualizar(
             @PathVariable Long id,
-            @RequestBody RequestMedicinaDto dto,
+            @RequestBody RequestMedicineDto dto,
             Principal principal) {
 
         return ResponseEntity.ok

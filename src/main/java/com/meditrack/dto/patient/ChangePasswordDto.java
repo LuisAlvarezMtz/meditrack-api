@@ -1,4 +1,4 @@
-package com.meditrack.dto.paciente;
+package com.meditrack.dto.patient;
 
 import lombok.Data;
 

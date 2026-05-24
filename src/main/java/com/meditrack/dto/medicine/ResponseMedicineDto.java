@@ -1,4 +1,4 @@
-package com.meditrack.dto.medicina;
+package com.meditrack.dto.medicine;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,11 +9,11 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseMedicinaDto {
+public class ResponseMedicineDto {
     private Long id;
-    private String nombre;
+    private String name;
     private String dosageForm;
     private LocalDate expirationDate;
-    private String pacienteNombre;
-    private String registradoPorNombre;
+    private String patientName;
+    private String registeredByName;
 }

@@ -1,4 +1,4 @@
-package com.meditrack.dto.paciente;
+package com.meditrack.dto.patient;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdatePacientePerfilResponseDto {
+public class UpdatePatientProfileResponseDto {
     private String message;
     private boolean requiresReauth;
-    private ResponsePacientePerfilDto paciente;
+    private ResponsePatientProfileDto patient;
 }

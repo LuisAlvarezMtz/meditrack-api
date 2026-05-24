@@ -1,7 +1,7 @@
 package com.meditrack.service;
 
-import com.meditrack.dto.medicina.RequestMedicinaDto;
-import com.meditrack.dto.medicina.ResponseMedicinaDto;
+import com.meditrack.dto.medicine.RequestMedicineDto;
+import com.meditrack.dto.medicine.ResponseMedicineDto;
 import com.meditrack.exception.ForbiddenException;
 import com.meditrack.exception.NotFoundException;
 import com.meditrack.mapper.MedicinaMapper;
@@ -24,12 +24,12 @@ public class MedicinaService {
     private final EntidadValidator entidadValidator;
 
     @Transactional
-    public ResponseMedicinaDto registrarMedicina
-            (RequestMedicinaDto dto, String phoneNumber) {
+    public ResponseMedicineDto registrarMedicina
+            (RequestMedicineDto dto, String phoneNumber) {
 
         User registradoPor = entidadValidator.usuario(phoneNumber);
 
-        Patient patient = entidadValidator.resolverPaciente(registradoPor, dto.getPacienteId());
+        Patient patient = entidadValidator.resolverPaciente(registradoPor, dto.getPatientId());
 
         Medicine medicine = MedicinaMapper.toEntity(dto, patient, registradoPor);
         Medicine guardada = medicinaRepository.save(medicine);
@@ -37,7 +37,7 @@ public class MedicinaService {
         return MedicinaMapper.toResponse(guardada);
     }
 
-    public List<ResponseMedicinaDto> obtenerMedicinasDelPaciente(String phoneNumber) {
+    public List<ResponseMedicineDto> obtenerMedicinasDelPaciente(String phoneNumber) {
         User user = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
@@ -46,7 +46,7 @@ public class MedicinaService {
         }
 
         Patient patient = user.getPatient();
-        List<Medicine> medicines = medicinaRepository.findByPacienteAndEstado(patient, com.meditrack.model.Status.ACTIVO);
+        List<Medicine> medicines = medicinaRepository.findByPacienteAndEstado(patient, com.meditrack.model.Status.ACTIVE);
 
         return medicines.stream()
                 .map(MedicinaMapper::toResponse)
@@ -54,11 +54,11 @@ public class MedicinaService {
     }
 
 
-    public List<ResponseMedicinaDto> obtenerMedicinasDePaciente(Long pacienteId, String phonNumberCuidador) {
+    public List<ResponseMedicineDto> obtenerMedicinasDePaciente(Long pacienteId, String phonNumberCuidador) {
         User user = userRepository.findByPhoneNumber(phonNumberCuidador)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
-        if (user.getRole() != Role.CUIDADOR) {
+        if (user.getRole() != Role.CAREGIVER) {
             throw new ForbiddenException("Solo los cuidadores pueden ver medicines de pacientes");
         }
 
@@ -70,14 +70,14 @@ public class MedicinaService {
                 .orElseThrow(() -> new ForbiddenException(
                         "No puedes ver medicines de un patient no vinculado"));
 
-        List<Medicine> medicines = medicinaRepository.findByPacienteAndEstado(patient, com.meditrack.model.Status.ACTIVO);
+        List<Medicine> medicines = medicinaRepository.findByPacienteAndEstado(patient, com.meditrack.model.Status.ACTIVE);
 
         return medicines.stream()
                 .map(MedicinaMapper::toResponse)
                 .toList();
     }
 
-    public ResponseMedicinaDto obtenerPorId(Long id, String phoneNumber) {
+    public ResponseMedicineDto obtenerPorId(Long id, String phoneNumber) {
         Medicine medicine = medicinaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Medicine no encontrada"));
 
@@ -86,13 +86,13 @@ public class MedicinaService {
         return MedicinaMapper.toResponse(medicine);
     }
 
-    public ResponseMedicinaDto actualizarMedicina(Long id, RequestMedicinaDto dto, String phoneNumber) {
+    public ResponseMedicineDto actualizarMedicina(Long id, RequestMedicineDto dto, String phoneNumber) {
         Medicine medicine = medicinaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Medicine no encontrada"));
 
         validarAcceso(medicine.getPatient(), phoneNumber);
 
-        medicine.setNombre(dto.getNombre());
+        medicine.setName(dto.getName());
         medicine.setDosageForm(dto.getDosageForm());
         medicine.setExpirationDate(dto.getExpirationDate());
 
@@ -107,8 +107,8 @@ public class MedicinaService {
 
         validarAcceso(medicine.getPatient(), phoneNumber);
 
-        medicine.setStatus(com.meditrack.model.Status.INACTIVO);
-        medicine.getAlarmasConfig().clear();
+        medicine.setStatus(com.meditrack.model.Status.INACTIVE);
+        medicine.getAlarmConfigs().clear();
 
     }
 

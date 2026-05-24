@@ -1,14 +1,14 @@
 package com.meditrack.service;
 
 import com.meditrack.dto.auth.AuthResponseDto;
-import com.meditrack.dto.cuidador.RequestCuidadorDto;
-import com.meditrack.dto.cuidador.ResponseCuidadorDto;
-import com.meditrack.dto.cuidador.UpdateCuidadorDto;
-import com.meditrack.dto.cuidador.UpdateCuidadorResponseDto;
-import com.meditrack.dto.paciente.RequestPacienteDto;
-import com.meditrack.dto.paciente.ResponsePacienteDto;
-import com.meditrack.dto.paciente.ResponsePacientePerfilDto;
-import com.meditrack.dto.paciente.UpdatePacientePerfilDto;
+import com.meditrack.dto.caregiver.RequestCaregiverDto;
+import com.meditrack.dto.caregiver.ResponseCaregiverDto;
+import com.meditrack.dto.caregiver.UpdateCaregiverDto;
+import com.meditrack.dto.caregiver.UpdateCaregiverResponseDto;
+import com.meditrack.dto.patient.RequestPatientDto;
+import com.meditrack.dto.patient.ResponsePatientDto;
+import com.meditrack.dto.patient.ResponsePatientProfileDto;
+import com.meditrack.dto.patient.UpdatePatientProfileDto;
 import com.meditrack.exception.ConflictException;
 import com.meditrack.exception.ForbiddenException;
 import com.meditrack.exception.NotFoundException;
@@ -39,7 +39,7 @@ public class CuidadorService {
 
 
     @Transactional
-    public AuthResponseDto registrar(RequestCuidadorDto dto) {
+    public AuthResponseDto registrar(RequestCaregiverDto dto) {
 
         Optional<User> existente = userRepo.findByPhoneNumber(dto.getPhoneNumber());
         if (existente.isPresent()) {
@@ -58,7 +58,7 @@ public class CuidadorService {
         return new AuthResponseDto(accessToken, refreshToken);
     }
 
-    public UpdateCuidadorResponseDto actualizarCuidador(String phoneNumber, UpdateCuidadorDto dto) {
+    public UpdateCaregiverResponseDto actualizarCuidador(String phoneNumber, UpdateCaregiverDto dto) {
 
         Caregiver caregiver = cuidadorRepository.findByUserPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new NotFoundException("Caregiver no encontrado"));
@@ -74,7 +74,7 @@ public class CuidadorService {
 
         cuidadorRepository.save(caregiver);
 
-        return new UpdateCuidadorResponseDto(
+        return new UpdateCaregiverResponseDto(
                 requiresReauth
                         ? "Teléfono actualizado. Se requiere iniciar sesión nuevamente."
                         : "Datos actualizados correctamente",
@@ -84,14 +84,14 @@ public class CuidadorService {
     }
 
 
-    public List<ResponsePacienteDto> obtenerPacientesDeCuidador(String phoneNumberCuidador) {
+    public List<ResponsePatientDto> obtenerPacientesDeCuidador(String phoneNumberCuidador) {
         Caregiver caregiver = obtenerCuidador(phoneNumberCuidador);
         return caregiver.getPatients().stream()
                 .map(PacienteMapper::toResponse)
                 .toList();
     }
 
-    public ResponseCuidadorDto obtenerMisDatos(String phoneNumberCuidador) {
+    public ResponseCaregiverDto obtenerMisDatos(String phoneNumberCuidador) {
         Caregiver caregiver = cuidadorRepository.findByUserPhoneNumber(phoneNumberCuidador)
                 .orElseThrow(() -> new NotFoundException("Caregiver no encontrado"));
 
@@ -99,9 +99,9 @@ public class CuidadorService {
     }
 
     @Transactional
-    public ResponsePacienteDto registrarPacienteDesdeCuidador(
+    public ResponsePatientDto registrarPacienteDesdeCuidador(
             String phoneNumberCuidador,
-            RequestPacienteDto dto) {
+            RequestPatientDto dto) {
 
         Caregiver caregiver = obtenerCuidador(phoneNumberCuidador);
         if (userRepo.findByPhoneNumber(dto.getPhoneNumber()).isPresent()) {
@@ -129,10 +129,10 @@ public class CuidadorService {
     }
 
     @Transactional
-    public ResponsePacientePerfilDto actualizarPacienteDesdeCuidador(
+    public ResponsePatientProfileDto actualizarPacienteDesdeCuidador(
             Long pacienteId,
             String phoneCuidador,
-            UpdatePacientePerfilDto dto
+            UpdatePatientProfileDto dto
     ) {
 
         Caregiver caregiver = obtenerCuidador(phoneCuidador);
@@ -148,7 +148,7 @@ public class CuidadorService {
     }
 
     @Transactional(readOnly = true)
-    public ResponsePacientePerfilDto obtenerPacienteDesdeCuidador(
+    public ResponsePatientProfileDto obtenerPacienteDesdeCuidador(
             Long pacienteId,
             String phoneCuidador
     ) {

@@ -60,7 +60,7 @@ public class EntidadValidator {
             }
         }
 
-        if (user.getRole() == Role.CUIDADOR) {
+        if (user.getRole() == Role.CAREGIVER) {
             boolean vinculado = user.getCaregiver().getPatients().stream()
                     .anyMatch(p -> p.getId().equals(patient.getId()));
 
@@ -99,7 +99,7 @@ public class EntidadValidator {
             if (!Objects.equals(patient.getUser().getId(), user.getId()))
                 throw new ForbiddenException("No puedes gestionar alarmas de otro patient");
         }
-        if (user.getRole() == Role.CUIDADOR) {
+        if (user.getRole() == Role.CAREGIVER) {
             boolean vinculado = user.getCaregiver().getPatients().stream()
                     .anyMatch(p -> p.getId().equals(patient.getId()));
             if (!vinculado)

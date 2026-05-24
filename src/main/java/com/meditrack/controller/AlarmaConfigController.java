@@ -1,8 +1,8 @@
 package com.meditrack.controller;
 
-import com.meditrack.dto.alarma.AlarmaResponseDto;
-import com.meditrack.dto.alarmaconfig.AlarmaConfigRequestDto;
-import com.meditrack.dto.alarmaconfig.AlarmaConfigResponseDto;
+import com.meditrack.dto.alarm.AlarmResponseDto;
+import com.meditrack.dto.alarmconfig.AlarmConfigRequestDto;
+import com.meditrack.dto.alarmconfig.AlarmConfigResponseDto;
 import com.meditrack.model.AlarmStatus;
 import com.meditrack.service.AlarmaConfigService;
 import com.meditrack.service.AlarmaService;
@@ -27,11 +27,11 @@ public class AlarmaConfigController {
     }
 
     @PostMapping("/crear")
-    public ResponseEntity<AlarmaConfigResponseDto> crearConfiguracionAlarma(
-            @RequestBody AlarmaConfigRequestDto alarmaConfig,
+    public ResponseEntity<AlarmConfigResponseDto> crearConfiguracionAlarma(
+            @RequestBody AlarmConfigRequestDto alarmaConfig,
             Principal principal
     ) {
-        AlarmaConfigResponseDto alarma =
+        AlarmConfigResponseDto alarma =
                 alarmaConfigService.crear(alarmaConfig, principal.getName());
 
         return ResponseEntity.ok(alarma);
@@ -39,7 +39,7 @@ public class AlarmaConfigController {
 
 
     @GetMapping("/mias")
-    public ResponseEntity<List<AlarmaConfigResponseDto>> obtenerAlarmasConfig(
+    public ResponseEntity<List<AlarmConfigResponseDto>> obtenerAlarmasConfig(
             @RequestParam(required = false) Long pacienteId,
             Principal principal
     ) {
@@ -52,7 +52,7 @@ public class AlarmaConfigController {
     }
 
     @GetMapping("/hoy")
-    public ResponseEntity<List<AlarmaResponseDto>> obtenerHoy(
+    public ResponseEntity<List<AlarmResponseDto>> obtenerHoy(
             @RequestParam(required = false) Long pacienteId,
             Principal principal
     ) {
@@ -65,9 +65,9 @@ public class AlarmaConfigController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AlarmaConfigResponseDto> actualizar(
+    public ResponseEntity<AlarmConfigResponseDto> actualizar(
             @PathVariable Long id,
-            @RequestBody AlarmaConfigRequestDto dto,
+            @RequestBody AlarmConfigRequestDto dto,
             Principal principal
     ) {
         return ResponseEntity.ok(
@@ -95,7 +95,7 @@ public class AlarmaConfigController {
     }
 
     @GetMapping("/medicina/{medicinaId}")
-    public ResponseEntity<List<AlarmaConfigResponseDto>> obtenerPorMedicina(
+    public ResponseEntity<List<AlarmConfigResponseDto>> obtenerPorMedicina(
             @PathVariable Long medicinaId,
             @RequestParam(required = false) Long pacienteId,
             Principal principal
@@ -110,7 +110,7 @@ public class AlarmaConfigController {
     }
 
     @GetMapping("/historial")
-    public ResponseEntity<List<AlarmaResponseDto>> obtenerHistorial(
+    public ResponseEntity<List<AlarmResponseDto>> obtenerHistorial(
             @RequestParam(required = false) Long pacienteId,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,

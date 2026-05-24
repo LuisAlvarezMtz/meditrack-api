@@ -1,11 +1,11 @@
 package com.meditrack.controller;
 
 import com.meditrack.dto.auth.AuthResponseDto;
-import com.meditrack.dto.cuidador.CuidadorInfoDto;
-import com.meditrack.dto.paciente.RequestPacienteDto;
-import com.meditrack.dto.paciente.ResponsePacienteDto;
-import com.meditrack.dto.paciente.UpdatePacientePerfilDto;
-import com.meditrack.dto.paciente.UpdatePacientePerfilResponseDto;
+import com.meditrack.dto.caregiver.CaregiverInfoDto;
+import com.meditrack.dto.patient.RequestPatientDto;
+import com.meditrack.dto.patient.ResponsePatientDto;
+import com.meditrack.dto.patient.UpdatePatientProfileDto;
+import com.meditrack.dto.patient.UpdatePatientProfileResponseDto;
 import com.meditrack.service.JWTService;
 import com.meditrack.service.PacienteService;
 import jakarta.validation.Valid;
@@ -27,16 +27,16 @@ public class PacienteController {
 
     @PostMapping("/registro")
     public ResponseEntity<AuthResponseDto> registrar(
-            @Valid @RequestBody RequestPacienteDto dto
+            @Valid @RequestBody RequestPatientDto dto
     ) {
         AuthResponseDto response = pacienteSrv.registrar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/perfil")
-    public ResponseEntity<UpdatePacientePerfilResponseDto> actualizarPerfil(
+    public ResponseEntity<UpdatePatientProfileResponseDto> actualizarPerfil(
             @RequestHeader("Authorization") String token,
-            @RequestBody UpdatePacientePerfilDto dto
+            @RequestBody UpdatePatientProfileDto dto
     ) {
 
         String jwt = token.replace("Bearer ", "");
@@ -61,7 +61,7 @@ public class PacienteController {
     }
 
     @GetMapping("/cuidador")
-    public ResponseEntity<CuidadorInfoDto> obtenerCuidadorPorCodigo(
+    public ResponseEntity<CaregiverInfoDto> obtenerCuidadorPorCodigo(
             @RequestParam String codigo) {
 
         return ResponseEntity.ok(
@@ -81,11 +81,11 @@ public class PacienteController {
     }
 
     @GetMapping("/perfil")
-    public ResponseEntity<ResponsePacienteDto> obtenerMisDatos
+    public ResponseEntity<ResponsePatientDto> obtenerMisDatos
             (Authentication authentication) {
         String phoneNumber = authentication.getName();
 
-        ResponsePacienteDto response = pacienteSrv.obtenerPerfil(phoneNumber);
+        ResponsePatientDto response = pacienteSrv.obtenerPerfil(phoneNumber);
         return ResponseEntity.ok(response);
     }
 

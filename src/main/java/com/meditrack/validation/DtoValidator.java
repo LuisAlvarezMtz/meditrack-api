@@ -1,6 +1,6 @@
 package com.meditrack.validation;
 
-import com.meditrack.dto.alarmaconfig.AlarmaConfigRequestDto;
+import com.meditrack.dto.alarmconfig.AlarmConfigRequestDto;
 import com.meditrack.exception.BadRequestException;
 import org.springframework.stereotype.Component;
 
@@ -12,19 +12,19 @@ public class DtoValidator {
 
     private static final ZoneId ZONA = ZoneId.of("America/Mexico_City");
 
-    public void validarDto(AlarmaConfigRequestDto dto) {
+    public void validarDto(AlarmConfigRequestDto dto) {
         validarFechas(dto);
         validarFrecuencia(dto);
         validarFechaInicioNoPasada(dto.getFechaInicio());
     }
 
-    private void validarFechas(AlarmaConfigRequestDto dto) {
+    private void validarFechas(AlarmConfigRequestDto dto) {
         if (dto.getFechaFin().isBefore(dto.getFechaInicio())) {
             throw new BadRequestException("Fecha fin no puede ser menor a la fecha de inicio");
         }
     }
 
-    private void validarFrecuencia(AlarmaConfigRequestDto dto) {
+    private void validarFrecuencia(AlarmConfigRequestDto dto) {
         if (dto.getFrecuenciaHoras() <= 0) {
             throw new BadRequestException("Frecuencia inválida");
         }

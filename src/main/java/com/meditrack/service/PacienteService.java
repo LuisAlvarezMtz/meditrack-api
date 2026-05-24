@@ -1,8 +1,8 @@
 package com.meditrack.service;
 
 import com.meditrack.dto.auth.AuthResponseDto;
-import com.meditrack.dto.cuidador.CuidadorInfoDto;
-import com.meditrack.dto.paciente.*;
+import com.meditrack.dto.caregiver.CaregiverInfoDto;
+import com.meditrack.dto.patient.*;
 import com.meditrack.exception.BadRequestException;
 import com.meditrack.exception.ConflictException;
 import com.meditrack.exception.ForbiddenException;
@@ -37,7 +37,7 @@ public class PacienteService {
     }
 
     @Transactional
-    public AuthResponseDto registrar(RequestPacienteDto dto) {
+    public AuthResponseDto registrar(RequestPatientDto dto) {
         Optional<User> existente = userRepo.findByPhoneNumber(dto.getPhoneNumber());
         if (existente.isPresent()) {
             throw new ConflictException("El teléfono ya está registrado");
@@ -72,11 +72,11 @@ public class PacienteService {
     }
 
     @Transactional(readOnly = true)
-    public CuidadorInfoDto buscarCuidadorPorCodigo(String codigo) {
+    public CaregiverInfoDto buscarCuidadorPorCodigo(String codigo) {
         Caregiver caregiver = cuidadorRepository
                 .findByCodigoVinculacion(codigo).orElseThrow(() ->
                         new BadRequestException("Código de caregiver no válido"));
-        return new CuidadorInfoDto(
+        return new CaregiverInfoDto(
                 caregiver.getUser().getName(),
                 caregiver.getUser().getPhoneNumber());
     }
@@ -94,7 +94,7 @@ public class PacienteService {
         pacienteRepository.save(patient);
     }
 
-    public ResponsePacienteDto obtenerPerfil(String phoneNumberUsuarioActual) {
+    public ResponsePatientDto obtenerPerfil(String phoneNumberUsuarioActual) {
         User user = userRepo.findByPhoneNumber(phoneNumberUsuarioActual)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
@@ -120,9 +120,9 @@ public class PacienteService {
     }
 
     @Transactional
-    public ResponsePacientePerfilDto actualizarPerfilPacienteDesdeCuidador(
+    public ResponsePatientProfileDto actualizarPerfilPacienteDesdeCuidador(
             Patient patient,
-            UpdatePacientePerfilDto dto
+            UpdatePatientProfileDto dto
     ) {
         validarCambioTelefono(patient, dto.getPhoneNumber());
 
@@ -132,9 +132,9 @@ public class PacienteService {
     }
 
     @Transactional
-    public UpdatePacientePerfilResponseDto actualizarPerfilPropio(
+    public UpdatePatientProfileResponseDto actualizarPerfilPropio(
             String phoneNumber,
-            UpdatePacientePerfilDto dto
+            UpdatePatientProfileDto dto
     ) {
 
         Patient patient = pacienteRepository
@@ -147,7 +147,7 @@ public class PacienteService {
 
         userRepo.save(patient.getUser());
 
-        return new UpdatePacientePerfilResponseDto(
+        return new UpdatePatientProfileResponseDto(
                 requiresReauth
                         ? "Teléfono actualizado. Se requiere iniciar sesión nuevamente."
                         : "Perfil actualizado correctamente",

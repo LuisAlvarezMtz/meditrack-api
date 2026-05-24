@@ -1,4 +1,4 @@
-package com.meditrack.dto.paciente;
+package com.meditrack.dto.patient;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,11 +9,14 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponsePacientePerfilDto {
+public class ResponsePatientDto {
     private Long id;
     private String name;
     private String phoneNumber;
-    private Integer edad;
+    private String caregiverName;
+    private String caregiverCode;
+    private Integer age;
     private String curp;
-    private List<String> enfermedadesCronicas;
+    private List<String> chronicDiseases;
+
 }

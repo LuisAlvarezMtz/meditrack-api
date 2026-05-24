@@ -1,4 +1,4 @@
-package com.meditrack.dto.cuidador;
+package com.meditrack.dto.caregiver;
 
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateCuidadorDto {
+public class UpdateCaregiverDto {
     private String name;
 
-    @Pattern(regexp = "\\d{10}", message = "El teléfono debe tener 10 dígitos")
+    @Pattern(regexp = "\\d{10}", message = "Phone number must have 10 digits")
     private String phoneNumber;
 
-    private String ocupacion;
+    private String occupation;
 }
