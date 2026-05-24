@@ -2,8 +2,8 @@ package com.meditrack.mapper;
 
 import com.meditrack.dto.alarmaconfig.AlarmaConfigRequestDto;
 import com.meditrack.dto.alarmaconfig.AlarmaConfigResponseDto;
-import com.meditrack.model.AlarmaConfig;
-import com.meditrack.model.Medicina;
+import com.meditrack.model.AlarmConfig;
+import com.meditrack.model.Medicine;
 
 import java.time.LocalDateTime;
 
@@ -11,12 +11,12 @@ public class AlarmaConfigMapper {
 
     private AlarmaConfigMapper() {}
 
-    public static AlarmaConfig toEntity(
+    public static AlarmConfig toEntity(
             AlarmaConfigRequestDto dto,
-            Medicina medicina
+            Medicine medicine
     ) {
-        AlarmaConfig config = new AlarmaConfig();
-        config.setMedicina(medicina);
+        AlarmConfig config = new AlarmConfig();
+        config.setMedicine(medicine);
         config.setFechaInicio(dto.getFechaInicio());
         config.setFechaFin(dto.getFechaFin());
         config.setFrecuenciaHoras(dto.getFrecuenciaHoras());
@@ -26,12 +26,12 @@ public class AlarmaConfigMapper {
         return config;
     }
 
-    public static AlarmaConfigResponseDto toResponseDTO(AlarmaConfig entity) {
+    public static AlarmaConfigResponseDto toResponseDTO(AlarmConfig entity) {
         AlarmaConfigResponseDto dto = new AlarmaConfigResponseDto();
         dto.setId(entity.getId());
-        dto.setPacienteId(entity.getPaciente().getId());
-        dto.setMedicinaId(entity.getMedicina().getId());
-        dto.setMedicinaNombre(entity.getMedicina().getNombre());
+        dto.setPacienteId(entity.getPatient().getId());
+        dto.setMedicinaId(entity.getMedicine().getId());
+        dto.setMedicinaNombre(entity.getMedicine().getNombre());
         dto.setFechaInicio(entity.getFechaInicio());
         dto.setFechaFin(entity.getFechaFin());
         dto.setFrecuenciaHoras(entity.getFrecuenciaHoras());

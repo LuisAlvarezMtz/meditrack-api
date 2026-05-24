@@ -46,19 +46,19 @@ public class AlarmaConfigService {
 
         User user = entidadValidator.usuario(phoneNumber);
 
-        Paciente paciente = entidadValidator.resolverPaciente(user, dto.getPacienteId());
+        Patient patient = entidadValidator.resolverPaciente(user, dto.getPacienteId());
 
-        Medicina medicina = entidadValidator.medicinaValida(dto.getMedicinaId(), paciente);
+        Medicine medicine = entidadValidator.medicinaValida(dto.getMedicinaId(), patient);
 
-        AlarmaConfig config = AlarmaConfigMapper.toEntity(dto, medicina);
-        config.setPaciente(paciente);
+        AlarmConfig config = AlarmaConfigMapper.toEntity(dto, medicine);
+        config.setPatient(patient);
         config.setActivo(true);
         config.setCreado(ahora);
 
         alarmaConfigRepository.save(config);
 
-        List<Alarma> alarmas = generarAlarmas(config, ahora);
-        alarmaRepository.saveAll(alarmas);
+        List<Alarm> alarms = generarAlarmas(config, ahora);
+        alarmaRepository.saveAll(alarms);
 
         return AlarmaConfigMapper.toResponseDTO(config);
     }
@@ -66,9 +66,9 @@ public class AlarmaConfigService {
     /**
      * Genera las alarmas con base en la configuración.
      */
-    private List<Alarma> generarAlarmas(AlarmaConfig config,
-                                        LocalDateTime ahora) {
-        List<Alarma> alarmas = new ArrayList<>();
+    private List<Alarm> generarAlarmas(AlarmConfig config,
+                                       LocalDateTime ahora) {
+        List<Alarm> alarms = new ArrayList<>();
 
         LocalDateTime fechaInicio = config.getFechaInicio();
         LocalDateTime fechaFin = config.getFechaFin();
@@ -81,28 +81,28 @@ public class AlarmaConfigService {
 
         if (total > MAX_ALARMAS) {
             throw new BadRequestException(
-                    "El rango genera demasiadas alarmas, " +
+                    "El rango genera demasiadas alarms, " +
                             "reduce el periodo o aumenta la frecuencia"
             );
         }
         LocalDateTime fecha = fechaInicio.isBefore(ahora) ? ahora : fechaInicio;
-        // Generar alarmas futuras
+        // Generar alarms futuras
         while (!fecha.isAfter(fechaFin)) {
 
-            Alarma alarma = new Alarma();
-            alarma.setAlarmaConfig(config);
-            alarma.setPaciente(config.getPaciente());
-            alarma.setMedicina(config.getMedicina());
-            alarma.setFechaHora(fecha);
-            alarma.setEstado(EstadoAlarma.PENDIENTE);
-            alarma.setNotificada(false);
-            alarma.setCreado(ahora);
+            Alarm alarm = new Alarm();
+            alarm.setAlarmConfig(config);
+            alarm.setPatient(config.getPatient());
+            alarm.setMedicine(config.getMedicine());
+            alarm.setFechaHora(fecha);
+            alarm.setEstado(AlarmStatus.PENDING);
+            alarm.setNotificada(false);
+            alarm.setCreado(ahora);
 
-            alarmas.add(alarma);
+            alarms.add(alarm);
 
             fecha = fecha.plusMinutes(frecuenciaEnMinutos);
         }
-        return alarmas;
+        return alarms;
     }
 
     /**
@@ -114,10 +114,10 @@ public class AlarmaConfigService {
             Long pacienteId
     ) {
         User user = entidadValidator.usuario(phoneNumber);
-        Paciente paciente= entidadValidator.resolverPaciente(user, pacienteId);
+        Patient patient = entidadValidator.resolverPaciente(user, pacienteId);
 
-        List<AlarmaConfig> alarmas =
-                alarmaConfigRepository.findActivasVigentes(paciente.getId());
+        List<AlarmConfig> alarmas =
+                alarmaConfigRepository.findActivasVigentes(patient.getId());
 
         return alarmas.stream()
                 .map(AlarmaConfigMapper::toResponseDTO)
@@ -131,14 +131,14 @@ public class AlarmaConfigService {
             Long pacienteId
     ) {
         User user = entidadValidator.usuario(phoneNumber);
-        Paciente paciente = entidadValidator.resolverPaciente(user, pacienteId);
+        Patient patient = entidadValidator.resolverPaciente(user, pacienteId);
 
-        Medicina medicina = entidadValidator.medicinaValida(medicinaId, paciente);
+        Medicine medicine = entidadValidator.medicinaValida(medicinaId, patient);
 
-        List<AlarmaConfig> configs =
+        List<AlarmConfig> configs =
                 alarmaConfigRepository.findActivasVigentesPorMedicina(
-                        paciente.getId(),
-                        medicina.getId()
+                        patient.getId(),
+                        medicine.getId()
                 );
 
         return configs.stream()
@@ -157,27 +157,27 @@ public class AlarmaConfigService {
         dtoValidator.validarDto(dto);
 
         User user = entidadValidator.usuario(phoneNumber);
-        AlarmaConfig config = entidadValidator.configValida(configId, user);
+        AlarmConfig config = entidadValidator.configValida(configId, user);
 
         if (!config.isActivo()) {
             throw new BadRequestException("La configuración está inactiva");
         }
 
-        Medicina medicina = entidadValidator.medicinaValida(
+        Medicine medicine = entidadValidator.medicinaValida(
                 dto.getMedicinaId(),
-                config.getPaciente()
+                config.getPatient()
         );
 
         alarmaRepository.deleteByAlarmaConfigIdAndFechaHoraGreaterThanEqual(configId, ahora);
         // actualizar TODA la config
-        config.setMedicina(medicina);
+        config.setMedicine(medicine);
         config.setFechaInicio(dto.getFechaInicio());
         config.setFechaFin(dto.getFechaFin());
         config.setFrecuenciaHoras(dto.getFrecuenciaHoras());
         config.setActualizado(ahora);
 
         //regenerar
-        List<Alarma> nuevas = generarAlarmas(config, ahora);
+        List<Alarm> nuevas = generarAlarmas(config, ahora);
 
         alarmaRepository.saveAll(nuevas);
 
@@ -189,7 +189,7 @@ public class AlarmaConfigService {
     public void eliminar(Long configId, String phoneNumber) {
 
         User user = entidadValidator.usuario(phoneNumber);
-        AlarmaConfig config = entidadValidator.configValida(configId, user);
+        AlarmConfig config = entidadValidator.configValida(configId, user);
 
         if (!config.isActivo()) {
             throw new BadRequestException("La configuración ya está eliminada");

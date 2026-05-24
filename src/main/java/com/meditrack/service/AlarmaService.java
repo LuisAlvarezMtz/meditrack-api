@@ -31,37 +31,37 @@ public class AlarmaService {
             Long pacienteId
     ) {
         User user = entidadValidator.usuario(phoneNumber);
-        Paciente paciente = entidadValidator.resolverPaciente(user, pacienteId);
+        Patient patient = entidadValidator.resolverPaciente(user, pacienteId);
 
         LocalDateTime inicio = LocalDate.now(ZONA_HORARIA).atStartOfDay();
         LocalDateTime fin = LocalDate.now(ZONA_HORARIA).atTime(23, 59, 59, 999999999);
 
-        List<Alarma> alarmas = alarmaRepository.findAlarmasDelDia(
-                paciente.getId(),
+        List<Alarm> alarms = alarmaRepository.findAlarmasDelDia(
+                patient.getId(),
                 inicio,
                 fin
         );
 
-        return alarmas.stream()
+        return alarms.stream()
                 .map(AlarmaMapper::toResponseDto)
                 .toList();
     }
 
     @Transactional
-    public void actualizarEstado(Long alarmaId, EstadoAlarma estado, String phoneNumber) {
+    public void actualizarEstado(Long alarmaId, AlarmStatus estado, String phoneNumber) {
         User user = entidadValidator.usuario(phoneNumber);
 
-        Alarma alarma = alarmaRepository.findById(alarmaId)
-                .orElseThrow(() -> new NotFoundException("Alarma no encontrada"));
+        Alarm alarm = alarmaRepository.findById(alarmaId)
+                .orElseThrow(() -> new NotFoundException("Alarm no encontrada"));
 
-        entidadValidator.configValida(alarma.getAlarmaConfig().getId(), user);
+        entidadValidator.configValida(alarm.getAlarmConfig().getId(), user);
 
-        if (!alarma.getAlarmaConfig().isActivo()) {
-            throw new BadRequestException("La alarma pertenece a una configuración inactiva");
+        if (!alarm.getAlarmConfig().isActivo()) {
+            throw new BadRequestException("La alarm pertenece a una configuración inactiva");
         }
 
-        alarma.setEstado(estado);
-        alarma.setNotificada(true);
+        alarm.setEstado(estado);
+        alarm.setNotificada(true);
     }
 
     @Transactional(readOnly = true)
@@ -72,7 +72,7 @@ public class AlarmaService {
             LocalDate fechaFin
     ) {
         User user = entidadValidator.usuario(phoneNumber);
-        Paciente paciente = entidadValidator.resolverPaciente(user, pacienteId);
+        Patient patient = entidadValidator.resolverPaciente(user, pacienteId);
 
         LocalDateTime inicio = (fechaInicio != null
                 ? fechaInicio
@@ -84,13 +84,13 @@ public class AlarmaService {
                 : LocalDate.now(ZONA_HORARIA))
                 .atTime(23, 59, 59, 999999999);
 
-        List<Alarma> alarmas = alarmaRepository.findHistorial(
-                paciente.getId(),
+        List<Alarm> alarms = alarmaRepository.findHistorial(
+                patient.getId(),
                 inicio,
                 fin
         );
 
-        return alarmas.stream()
+        return alarms.stream()
                 .map(AlarmaMapper::toResponseDto)
                 .toList();
     }

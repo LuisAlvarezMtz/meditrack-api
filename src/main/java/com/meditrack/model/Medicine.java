@@ -14,36 +14,38 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "medicinas")
-public class Medicina {
+@Table(name = "medicines")
+public class Medicine {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "nombre")
-    private String nombre;
-    @Column(name = "forma_farmaceutica")
+
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "dosage_form")
     private String dosageForm;
 
     @Enumerated(EnumType.STRING)
-    private Estado estado = Estado.ACTIVO;
+    private Status status = Status.ACTIVE;
 
-    @Column(nullable = false, name = "fecha_expiracion")
+    @Column(nullable = false, name = "expiration_date")
     private LocalDate expirationDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "paciente_id")
-    private Paciente paciente;
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
 
     @ManyToOne
-    @JoinColumn(name = "registrado_por_id")
-    private User registradoPor;
+    @JoinColumn(name = "registered_by_id")
+    private User registeredBy;
 
     @OneToMany(
-            mappedBy = "medicina",
+            mappedBy = "medicine",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
     @JsonIgnore
-    private List<AlarmaConfig> alarmasConfig = new ArrayList<>();
-
+    private List<AlarmConfig> alarmConfigs = new ArrayList<>();
 }

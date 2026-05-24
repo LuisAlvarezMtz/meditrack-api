@@ -2,50 +2,47 @@ package com.meditrack.mapper;
 
 import com.meditrack.dto.medicina.RequestMedicinaDto;
 import com.meditrack.dto.medicina.ResponseMedicinaDto;
-import com.meditrack.model.Medicina;
-import com.meditrack.model.Paciente;
-import com.meditrack.model.Rol;
-import com.meditrack.model.User;
+import com.meditrack.model.*;
 
 public class MedicinaMapper {
 
-    public static Medicina toEntity(RequestMedicinaDto dto, Paciente paciente, User registradoPor) {
+    public static Medicine toEntity(RequestMedicinaDto dto, Patient patient, User registradoPor) {
         if (dto == null) return null;
 
-        Medicina medicina = new Medicina();
-        medicina.setNombre(dto.getNombre());
-        medicina.setDosageForm(dto.getDosageForm());
-        medicina.setExpirationDate(dto.getExpirationDate());
-        medicina.setPaciente(paciente);
-        medicina.setRegistradoPor(registradoPor);
+        Medicine medicine = new Medicine();
+        medicine.setNombre(dto.getNombre());
+        medicine.setDosageForm(dto.getDosageForm());
+        medicine.setExpirationDate(dto.getExpirationDate());
+        medicine.setPatient(patient);
+        medicine.setRegistradoPor(registradoPor);
 
-        return medicina;
+        return medicine;
     }
 
-    public static ResponseMedicinaDto toResponse(Medicina medicina) {
-        if (medicina == null) return null;
+    public static ResponseMedicinaDto toResponse(Medicine medicine) {
+        if (medicine == null) return null;
 
         String registradoPor;
 
-        if (medicina.getRegistradoPor() != null &&
-                medicina.getRegistradoPor().getRol() == Rol.CUIDADOR) {
-            registradoPor = "Cuidador";
+        if (medicine.getRegistradoPor() != null &&
+                medicine.getRegistradoPor().getRole() == Role.CUIDADOR) {
+            registradoPor = "Caregiver";
         } else {
-            registradoPor = "Paciente";
+            registradoPor = "Patient";
         }
 
         ResponseMedicinaDto dto = new ResponseMedicinaDto();
-        dto.setId(medicina.getId());
-        dto.setNombre(medicina.getNombre());
-        dto.setDosageForm(medicina.getDosageForm());
-        dto.setExpirationDate(medicina.getExpirationDate());
+        dto.setId(medicine.getId());
+        dto.setNombre(medicine.getNombre());
+        dto.setDosageForm(medicine.getDosageForm());
+        dto.setExpirationDate(medicine.getExpirationDate());
         dto.setRegistradoPorNombre(registradoPor);
 
 
-        if (medicina.getPaciente() != null &&
-                medicina.getPaciente().getUser() != null) {
+        if (medicine.getPatient() != null &&
+                medicine.getPatient().getUser() != null) {
             dto.setPacienteNombre(
-                    medicina.getPaciente().getUser().getName()
+                    medicine.getPatient().getUser().getName()
             );
         }
 

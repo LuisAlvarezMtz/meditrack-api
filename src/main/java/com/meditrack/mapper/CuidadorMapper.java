@@ -3,8 +3,8 @@ package com.meditrack.mapper;
 import com.meditrack.dto.cuidador.RequestCuidadorDto;
 import com.meditrack.dto.cuidador.ResponseCuidadorDto;
 import com.meditrack.dto.cuidador.UpdateCuidadorDto;
-import com.meditrack.model.Cuidador;
-import com.meditrack.model.Rol;
+import com.meditrack.model.Caregiver;
+import com.meditrack.model.Role;
 import com.meditrack.model.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -15,38 +15,38 @@ public class CuidadorMapper {
 
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
-    public static Cuidador toEntity(RequestCuidadorDto dto) {
+    public static Caregiver toEntity(RequestCuidadorDto dto) {
         if (dto == null) return null;
 
         User user = new User();
         user.setName(dto.getName());
         user.setPhoneNumber(dto.getPhoneNumber());
         user.setPassword(encoder.encode(dto.getPassword()));
-        user.setRol(Rol.CUIDADOR);
+        user.setRole(Role.CUIDADOR);
 
-        Cuidador cuidador = new Cuidador();
-        cuidador.setOcupacion(dto.getOcupacion());
-        cuidador.setCodigoVinculacion(generarCodigo());
-        cuidador.setUser(user);
+        Caregiver caregiver = new Caregiver();
+        caregiver.setOcupacion(dto.getOcupacion());
+        caregiver.setCodigoVinculacion(generarCodigo());
+        caregiver.setUser(user);
 
-        user.setCuidador(cuidador);
+        user.setCaregiver(caregiver);
 
-        return cuidador;
+        return caregiver;
     }
 
-    public static ResponseCuidadorDto toResponse(Cuidador cuidador) {
-        if (cuidador == null) return null;
+    public static ResponseCuidadorDto toResponse(Caregiver caregiver) {
+        if (caregiver == null) return null;
 
         ResponseCuidadorDto dto = new ResponseCuidadorDto();
-        dto.setId(cuidador.getId());
-        dto.setName(cuidador.getUser().getName());
-        dto.setPhoneNumber(cuidador.getUser().getPhoneNumber());
-        dto.setOcupacion(cuidador.getOcupacion());
-        dto.setCodigoVinculacion(cuidador.getCodigoVinculacion());
+        dto.setId(caregiver.getId());
+        dto.setName(caregiver.getUser().getName());
+        dto.setPhoneNumber(caregiver.getUser().getPhoneNumber());
+        dto.setOcupacion(caregiver.getOcupacion());
+        dto.setCodigoVinculacion(caregiver.getCodigoVinculacion());
 
-        if (cuidador.getPacientes() != null) {
+        if (caregiver.getPatients() != null) {
             dto.setPacientes(
-                    cuidador.getPacientes()
+                    caregiver.getPatients()
                             .stream()
                             .map(p -> p.getUser().getName())
                             .collect(Collectors.toList())
@@ -56,12 +56,12 @@ public class CuidadorMapper {
         return dto;
     }
 
-    public static boolean updateEntity(Cuidador cuidador, UpdateCuidadorDto dto) {
-        if (cuidador == null || dto == null) return false;
+    public static boolean updateEntity(Caregiver caregiver, UpdateCuidadorDto dto) {
+        if (caregiver == null || dto == null) return false;
 
         boolean requiresReauth = false;
 
-        User user = cuidador.getUser();
+        User user = caregiver.getUser();
 
         if (dto.getPhoneNumber() != null &&
                 !dto.getPhoneNumber().equals(user.getPhoneNumber())) {
@@ -75,7 +75,7 @@ public class CuidadorMapper {
         }
 
         if (dto.getOcupacion() != null) {
-            cuidador.setOcupacion(dto.getOcupacion());
+            caregiver.setOcupacion(dto.getOcupacion());
         }
 
         return requiresReauth;

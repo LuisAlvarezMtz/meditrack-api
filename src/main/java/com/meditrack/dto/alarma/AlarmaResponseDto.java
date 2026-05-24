@@ -2,7 +2,7 @@ package com.meditrack.dto.alarma;
 
 import java.time.LocalDateTime;
 
-import com.meditrack.model.EstadoAlarma;
+import com.meditrack.model.AlarmStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +17,6 @@ public class AlarmaResponseDto {
     private String medicinaNombre;
     private String dosageForm;
     private LocalDateTime fechaHora;
-    private EstadoAlarma estado;
+    private AlarmStatus estado;
     private boolean notificada;
 }

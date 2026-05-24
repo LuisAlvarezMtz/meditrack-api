@@ -1,41 +1,43 @@
 package com.meditrack.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Entity
-    @Table(name = "users")
-    public class User {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "users")
+public class User {
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
-        @Column(name = "nombre_completo")
-        private String name;
-        @Column(unique = true, nullable = false, length = 10, name = "telefono")
-        private String phoneNumber;
-        @Column(name = "contrasena")
-        private String password;
-        @Enumerated(EnumType.STRING)
-        private Rol rol;
-        @Column(name = "estado")
-        @Enumerated(EnumType.STRING)
-        private Estado state = Estado.ACTIVO;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @Column(name = "full_name")
+    private String name;
 
-        @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-        @JsonIgnore
-        private Paciente paciente;
+    @Column(unique = true, nullable = false, length = 10, name = "phone_number")
+    private String phoneNumber;
 
-        @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-        @JsonIgnore
-        private Cuidador cuidador;
+    @Column(name = "password")
+    private String password;
 
-    }
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.ACTIVE;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Patient patient;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Caregiver caregiver;
+}

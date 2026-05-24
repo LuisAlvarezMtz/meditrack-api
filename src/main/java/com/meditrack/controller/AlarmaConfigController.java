@@ -3,7 +3,7 @@ package com.meditrack.controller;
 import com.meditrack.dto.alarma.AlarmaResponseDto;
 import com.meditrack.dto.alarmaconfig.AlarmaConfigRequestDto;
 import com.meditrack.dto.alarmaconfig.AlarmaConfigResponseDto;
-import com.meditrack.model.EstadoAlarma;
+import com.meditrack.model.AlarmStatus;
 import com.meditrack.service.AlarmaConfigService;
 import com.meditrack.service.AlarmaService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -78,7 +78,7 @@ public class AlarmaConfigController {
     @PatchMapping("/{id}/estado")
     public ResponseEntity<Void> actualizarEstado(
             @PathVariable Long id,
-            @RequestParam EstadoAlarma estado,
+            @RequestParam AlarmStatus estado,
             Principal principal
     ) {
         alarmaService.actualizarEstado(id, estado, principal.getName());

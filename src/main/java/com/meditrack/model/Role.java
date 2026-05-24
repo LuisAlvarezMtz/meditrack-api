@@ -1,6 +1,6 @@
 package com.meditrack.model;
 
-public enum Rol {
+public enum Role {
     CUIDADOR,
-    PACIENTE
+    PATIENT
 }

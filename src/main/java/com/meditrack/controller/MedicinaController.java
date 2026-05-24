@@ -29,7 +29,7 @@ public class MedicinaController {
         return ResponseEntity.ok(response);
     }
 
-    //Paciente ve sus medicinas
+    //Patient ve sus medicinas
     @GetMapping("/mias")
     public ResponseEntity<List<ResponseMedicinaDto>> obtenerMisMedicinas
         (Principal principal) {
@@ -38,7 +38,7 @@ public class MedicinaController {
                         obtenerMedicinasDelPaciente(principal.getName()));
     }
 
-    //Cuidador ve las de un paciente vinculado
+    //Caregiver ve las de un paciente vinculado
     @GetMapping("/paciente/{id}")
     public ResponseEntity<List<ResponseMedicinaDto>> obtenerMedicinasPaciente(
             @PathVariable Long id,

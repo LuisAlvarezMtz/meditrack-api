@@ -12,23 +12,22 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "cuidadores")
-public class Cuidador {
+@Table(name = "caregivers")
+public class Caregiver {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String ocupacion;
+    private String occupation;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Column(unique = true)
-    private String codigoVinculacion;
+    private String linkCode;
 
-    @OneToMany(mappedBy = "cuidador", cascade = CascadeType.ALL)
-    private List<Paciente> pacientes = new ArrayList<>();
-
+    @OneToMany(mappedBy = "caregiver", cascade = CascadeType.ALL)
+    private List<Patient> patients = new ArrayList<>();
 }

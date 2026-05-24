@@ -9,43 +9,43 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
-@Table(name = "alarma_config")
+@Table(name = "alarm_configs")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AlarmaConfig {
+public class AlarmConfig {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "paciente_id", nullable = false)
-    private Paciente paciente;
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medicina_id", nullable = false)
-    private Medicina medicina;
+    @JoinColumn(name = "medicine_id", nullable = false)
+    private Medicine medicine;
 
-    private LocalDateTime fechaInicio;
+    private LocalDateTime startDate;
 
-    private LocalDateTime fechaFin;
+    private LocalDateTime endDate;
 
-    private int frecuenciaHoras;
+    private int frequencyHours;
 
-    private boolean activo;
+    private boolean active;
 
-    private LocalDateTime creado;
+    private LocalDateTime createdAt;
 
-    private LocalDateTime actualizado;
+    private LocalDateTime updatedAt;
 
     @OneToMany(
-            mappedBy = "alarmaConfig",
+            mappedBy = "alarmConfig",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<Alarma> alarmas = new ArrayList<>();
-
+    private List<Alarm> alarms = new ArrayList<>();
 }
 

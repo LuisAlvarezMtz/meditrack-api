@@ -27,64 +27,64 @@ public class EntidadValidator {
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
     }
 
-    public Paciente paciente(String phoneNumber) {
+    public Patient paciente(String phoneNumber) {
         User user = usuario(phoneNumber);
 
-        if (user.getRol() != Rol.PACIENTE) {
+        if (user.getRole() != Role.PATIENT) {
             throw new ForbiddenException("Solo pacientes pueden realizar esta acción");
         }
-        return user.getPaciente();
+        return user.getPatient();
     }
 
-    public Medicina medicinaValida(Long medicinaId, Paciente paciente) {
-        Medicina medicina = medicinaRepository.findById(medicinaId)
-                .orElseThrow(() -> new NotFoundException("Medicina no encontrada"));
+    public Medicine medicinaValida(Long medicinaId, Patient patient) {
+        Medicine medicine = medicinaRepository.findById(medicinaId)
+                .orElseThrow(() -> new NotFoundException("Medicine no encontrada"));
 
-        if (!medicina.getPaciente().getId().equals(paciente.getId())) {
-            throw new ForbiddenException("No tienes acceso a esta medicina");
+        if (!medicine.getPatient().getId().equals(patient.getId())) {
+            throw new ForbiddenException("No tienes acceso a esta medicine");
         }
 
-        return medicina;
+        return medicine;
     }
 
-    public AlarmaConfig configValida(Long configId, User user) {
+    public AlarmConfig configValida(Long configId, User user) {
 
-        AlarmaConfig config = alarmaConfigRepository.findById(configId)
+        AlarmConfig config = alarmaConfigRepository.findById(configId)
                 .orElseThrow(() -> new NotFoundException("Config no encontrada"));
 
-        Paciente paciente = config.getPaciente();
+        Patient patient = config.getPatient();
 
-        if (user.getRol() == Rol.PACIENTE) {
-            if (!paciente.getUser().getId().equals(user.getId())) {
+        if (user.getRole() == Role.PATIENT) {
+            if (!patient.getUser().getId().equals(user.getId())) {
                 throw new ForbiddenException("No tienes acceso a esta configuración");
             }
         }
 
-        if (user.getRol() == Rol.CUIDADOR) {
-            boolean vinculado = user.getCuidador().getPacientes().stream()
-                    .anyMatch(p -> p.getId().equals(paciente.getId()));
+        if (user.getRole() == Role.CUIDADOR) {
+            boolean vinculado = user.getCaregiver().getPatients().stream()
+                    .anyMatch(p -> p.getId().equals(patient.getId()));
 
             if (!vinculado) {
-                throw new ForbiddenException("Paciente no vinculado");
+                throw new ForbiddenException("Patient no vinculado");
             }
         }
 
         return config;
     }
 
-    public Paciente pacienteValidoParaUser(Long pacienteId, User user) {
-        Paciente paciente = pacienteRepository.findById(pacienteId)
-                .orElseThrow(() -> new NotFoundException("Paciente no encontrado"));
+    public Patient pacienteValidoParaUser(Long pacienteId, User user) {
+        Patient patient = pacienteRepository.findById(pacienteId)
+                .orElseThrow(() -> new NotFoundException("Patient no encontrado"));
 
-        validarAcceso(paciente, user);
+        validarAcceso(patient, user);
 
-        return paciente;
+        return patient;
     }
 
 
-    public Paciente resolverPaciente(User user, Long pacienteId) {
-        if (user.getRol() == Rol.PACIENTE) {
-            return user.getPaciente();
+    public Patient resolverPaciente(User user, Long pacienteId) {
+        if (user.getRole() == Role.PATIENT) {
+            return user.getPatient();
         }
 
         if (pacienteId == null) {
@@ -94,16 +94,16 @@ public class EntidadValidator {
         return pacienteValidoParaUser(pacienteId, user);
     }
 
-    public void validarAcceso(Paciente paciente, User user) {
-        if (user.getRol() == Rol.PACIENTE) {
-            if (!Objects.equals(paciente.getUser().getId(), user.getId()))
-                throw new ForbiddenException("No puedes gestionar alarmas de otro paciente");
+    public void validarAcceso(Patient patient, User user) {
+        if (user.getRole() == Role.PATIENT) {
+            if (!Objects.equals(patient.getUser().getId(), user.getId()))
+                throw new ForbiddenException("No puedes gestionar alarmas de otro patient");
         }
-        if (user.getRol() == Rol.CUIDADOR) {
-            boolean vinculado = user.getCuidador().getPacientes().stream()
-                    .anyMatch(p -> p.getId().equals(paciente.getId()));
+        if (user.getRole() == Role.CUIDADOR) {
+            boolean vinculado = user.getCaregiver().getPatients().stream()
+                    .anyMatch(p -> p.getId().equals(patient.getId()));
             if (!vinculado)
-                throw new ForbiddenException("Paciente no vinculado al cuidador");
+                throw new ForbiddenException("Patient no vinculado al cuidador");
         }
     }
 }

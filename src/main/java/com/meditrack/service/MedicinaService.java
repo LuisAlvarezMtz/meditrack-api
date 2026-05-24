@@ -29,10 +29,10 @@ public class MedicinaService {
 
         User registradoPor = entidadValidator.usuario(phoneNumber);
 
-        Paciente paciente = entidadValidator.resolverPaciente(registradoPor, dto.getPacienteId());
+        Patient patient = entidadValidator.resolverPaciente(registradoPor, dto.getPacienteId());
 
-        Medicina medicina = MedicinaMapper.toEntity(dto, paciente, registradoPor);
-        Medicina guardada = medicinaRepository.save(medicina);
+        Medicine medicine = MedicinaMapper.toEntity(dto, patient, registradoPor);
+        Medicine guardada = medicinaRepository.save(medicine);
 
         return MedicinaMapper.toResponse(guardada);
     }
@@ -41,14 +41,14 @@ public class MedicinaService {
         User user = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
-        if (user.getRol() != Rol.PACIENTE) {
+        if (user.getRole() != Role.PATIENT) {
             throw new ForbiddenException("Solo los pacientes pueden usar este método");
         }
 
-        Paciente paciente = user.getPaciente();
-        List<Medicina> medicinas = medicinaRepository.findByPacienteAndEstado(paciente, Estado.ACTIVO);
+        Patient patient = user.getPatient();
+        List<Medicine> medicines = medicinaRepository.findByPacienteAndEstado(patient, com.meditrack.model.Status.ACTIVO);
 
-        return medicinas.stream()
+        return medicines.stream()
                 .map(MedicinaMapper::toResponse)
                 .toList();
     }
@@ -58,63 +58,63 @@ public class MedicinaService {
         User user = userRepository.findByPhoneNumber(phonNumberCuidador)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
-        if (user.getRol() != Rol.CUIDADOR) {
-            throw new ForbiddenException("Solo los cuidadores pueden ver medicinas de pacientes");
+        if (user.getRole() != Role.CUIDADOR) {
+            throw new ForbiddenException("Solo los cuidadores pueden ver medicines de pacientes");
         }
 
-        Cuidador cuidador = user.getCuidador();
+        Caregiver caregiver = user.getCaregiver();
 
-        Paciente paciente = cuidador.getPacientes().stream()
+        Patient patient = caregiver.getPatients().stream()
                 .filter(p -> p.getId().equals(pacienteId))
                 .findFirst()
                 .orElseThrow(() -> new ForbiddenException(
-                        "No puedes ver medicinas de un paciente no vinculado"));
+                        "No puedes ver medicines de un patient no vinculado"));
 
-        List<Medicina> medicinas = medicinaRepository.findByPacienteAndEstado(paciente, Estado.ACTIVO);
+        List<Medicine> medicines = medicinaRepository.findByPacienteAndEstado(patient, com.meditrack.model.Status.ACTIVO);
 
-        return medicinas.stream()
+        return medicines.stream()
                 .map(MedicinaMapper::toResponse)
                 .toList();
     }
 
     public ResponseMedicinaDto obtenerPorId(Long id, String phoneNumber) {
-        Medicina medicina = medicinaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Medicina no encontrada"));
+        Medicine medicine = medicinaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Medicine no encontrada"));
 
-        validarAcceso(medicina.getPaciente(), phoneNumber);
+        validarAcceso(medicine.getPatient(), phoneNumber);
 
-        return MedicinaMapper.toResponse(medicina);
+        return MedicinaMapper.toResponse(medicine);
     }
 
     public ResponseMedicinaDto actualizarMedicina(Long id, RequestMedicinaDto dto, String phoneNumber) {
-        Medicina medicina = medicinaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Medicina no encontrada"));
+        Medicine medicine = medicinaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Medicine no encontrada"));
 
-        validarAcceso(medicina.getPaciente(), phoneNumber);
+        validarAcceso(medicine.getPatient(), phoneNumber);
 
-        medicina.setNombre(dto.getNombre());
-        medicina.setDosageForm(dto.getDosageForm());
-        medicina.setExpirationDate(dto.getExpirationDate());
+        medicine.setNombre(dto.getNombre());
+        medicine.setDosageForm(dto.getDosageForm());
+        medicine.setExpirationDate(dto.getExpirationDate());
 
-        Medicina guardada = medicinaRepository.save(medicina);
+        Medicine guardada = medicinaRepository.save(medicine);
         return MedicinaMapper.toResponse(guardada);
     }
 
     @Transactional
     public void desactivarMedicina(Long id, String phoneNumber) {
-        Medicina medicina = medicinaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Medicina no encontrada"));
+        Medicine medicine = medicinaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Medicine no encontrada"));
 
-        validarAcceso(medicina.getPaciente(), phoneNumber);
+        validarAcceso(medicine.getPatient(), phoneNumber);
 
-        medicina.setEstado(Estado.INACTIVO);
-        medicina.getAlarmasConfig().clear();
+        medicine.setStatus(com.meditrack.model.Status.INACTIVO);
+        medicine.getAlarmasConfig().clear();
 
     }
 
-    private void validarAcceso(Paciente paciente, String phoneNumber) {
+    private void validarAcceso(Patient patient, String phoneNumber) {
         User user = entidadValidator.usuario(phoneNumber);
-        entidadValidator.validarAcceso(paciente, user);
+        entidadValidator.validarAcceso(patient, user);
     }
 
 }

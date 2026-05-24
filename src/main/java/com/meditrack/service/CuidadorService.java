@@ -14,8 +14,8 @@ import com.meditrack.exception.ForbiddenException;
 import com.meditrack.exception.NotFoundException;
 import com.meditrack.mapper.CuidadorMapper;
 import com.meditrack.mapper.PacienteMapper;
-import com.meditrack.model.Cuidador;
-import com.meditrack.model.Paciente;
+import com.meditrack.model.Caregiver;
+import com.meditrack.model.Patient;
 import com.meditrack.model.User;
 import com.meditrack.repository.CuidadorRepository;
 import com.meditrack.repository.PacienteRepository;
@@ -45,12 +45,12 @@ public class CuidadorService {
         if (existente.isPresent()) {
             throw new ConflictException("El Teléfono ya está registrado");
         }
-        Cuidador cuidador = CuidadorMapper.toEntity(dto);
+        Caregiver caregiver = CuidadorMapper.toEntity(dto);
 
-        User userGuardado = userRepo.save(cuidador.getUser());
-        cuidador.setUser(userGuardado);
+        User userGuardado = userRepo.save(caregiver.getUser());
+        caregiver.setUser(userGuardado);
 
-        cuidadorRepository.save(cuidador);
+        cuidadorRepository.save(caregiver);
 
         String accessToken = jwtService.generateToken(userGuardado);
         String refreshToken = jwtService.generateRefreshToken(userGuardado);
@@ -60,42 +60,42 @@ public class CuidadorService {
 
     public UpdateCuidadorResponseDto actualizarCuidador(String phoneNumber, UpdateCuidadorDto dto) {
 
-        Cuidador cuidador = cuidadorRepository.findByUserPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new NotFoundException("Cuidador no encontrado"));
+        Caregiver caregiver = cuidadorRepository.findByUserPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new NotFoundException("Caregiver no encontrado"));
 
         if (dto.getPhoneNumber() != null &&
-                !dto.getPhoneNumber().equals(cuidador.getUser().getPhoneNumber())) {
+                !dto.getPhoneNumber().equals(caregiver.getUser().getPhoneNumber())) {
 
             if (userRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
                 throw new ConflictException("El número ya está en uso");
             }
         }
-        boolean requiresReauth = CuidadorMapper.updateEntity(cuidador, dto);
+        boolean requiresReauth = CuidadorMapper.updateEntity(caregiver, dto);
 
-        cuidadorRepository.save(cuidador);
+        cuidadorRepository.save(caregiver);
 
         return new UpdateCuidadorResponseDto(
                 requiresReauth
                         ? "Teléfono actualizado. Se requiere iniciar sesión nuevamente."
                         : "Datos actualizados correctamente",
                 requiresReauth,
-                CuidadorMapper.toResponse(cuidador)
+                CuidadorMapper.toResponse(caregiver)
         );
     }
 
 
     public List<ResponsePacienteDto> obtenerPacientesDeCuidador(String phoneNumberCuidador) {
-        Cuidador cuidador = obtenerCuidador(phoneNumberCuidador);
-        return cuidador.getPacientes().stream()
+        Caregiver caregiver = obtenerCuidador(phoneNumberCuidador);
+        return caregiver.getPatients().stream()
                 .map(PacienteMapper::toResponse)
                 .toList();
     }
 
     public ResponseCuidadorDto obtenerMisDatos(String phoneNumberCuidador) {
-        Cuidador cuidador = cuidadorRepository.findByUserPhoneNumber(phoneNumberCuidador)
-                .orElseThrow(() -> new NotFoundException("Cuidador no encontrado"));
+        Caregiver caregiver = cuidadorRepository.findByUserPhoneNumber(phoneNumberCuidador)
+                .orElseThrow(() -> new NotFoundException("Caregiver no encontrado"));
 
-        return CuidadorMapper.toResponse(cuidador);
+        return CuidadorMapper.toResponse(caregiver);
     }
 
     @Transactional
@@ -103,29 +103,29 @@ public class CuidadorService {
             String phoneNumberCuidador,
             RequestPacienteDto dto) {
 
-        Cuidador cuidador = obtenerCuidador(phoneNumberCuidador);
+        Caregiver caregiver = obtenerCuidador(phoneNumberCuidador);
         if (userRepo.findByPhoneNumber(dto.getPhoneNumber()).isPresent()) {
             throw new ConflictException("El número ya está registrado");
         }
-        Paciente paciente = PacienteMapper.toEntity(dto, cuidador);
-        pacienteRepository.save(paciente);
+        Patient patient = PacienteMapper.toEntity(dto, caregiver);
+        pacienteRepository.save(patient);
 
-        return PacienteMapper.toResponse(paciente);
+        return PacienteMapper.toResponse(patient);
     }
 
 
     @Transactional
     public void desvincularPaciente(Long pacienteId, String phoneNumber) {
 
-        Paciente paciente = pacienteRepository.findById(pacienteId)
-                .orElseThrow(() -> new NotFoundException("Paciente no encontrado"));
+        Patient patient = pacienteRepository.findById(pacienteId)
+                .orElseThrow(() -> new NotFoundException("Patient no encontrado"));
 
-        if (paciente.getCuidador() == null ||
-                !paciente.getCuidador().getUser().getPhoneNumber().equals(phoneNumber)) {
-            throw new ForbiddenException("No puedes desvincular este paciente");
+        if (patient.getCaregiver() == null ||
+                !patient.getCaregiver().getUser().getPhoneNumber().equals(phoneNumber)) {
+            throw new ForbiddenException("No puedes desvincular este patient");
         }
 
-        paciente.setCuidador(null);
+        patient.setCaregiver(null);
     }
 
     @Transactional
@@ -135,16 +135,16 @@ public class CuidadorService {
             UpdatePacientePerfilDto dto
     ) {
 
-        Cuidador cuidador = obtenerCuidador(phoneCuidador);
-        Paciente paciente = obtenerPaciente(pacienteId);
+        Caregiver caregiver = obtenerCuidador(phoneCuidador);
+        Patient patient = obtenerPaciente(pacienteId);
 
-        if (paciente.getCuidador() == null ||
-                !paciente.getCuidador().getId().equals(cuidador.getId())) {
+        if (patient.getCaregiver() == null ||
+                !patient.getCaregiver().getId().equals(caregiver.getId())) {
 
-            throw new ForbiddenException("Este paciente no pertenece al cuidador");
+            throw new ForbiddenException("Este patient no pertenece al caregiver");
         }
 
-        return pacienteService.actualizarPerfilPacienteDesdeCuidador(paciente, dto);
+        return pacienteService.actualizarPerfilPacienteDesdeCuidador(patient, dto);
     }
 
     @Transactional(readOnly = true)
@@ -153,25 +153,25 @@ public class CuidadorService {
             String phoneCuidador
     ) {
 
-        Cuidador cuidador = obtenerCuidador(phoneCuidador);
+        Caregiver caregiver = obtenerCuidador(phoneCuidador);
 
-        Paciente paciente = obtenerPaciente(pacienteId);
+        Patient patient = obtenerPaciente(pacienteId);
 
-        if (!paciente.getCuidador().getId().equals(cuidador.getId())) {
-            throw new ForbiddenException("Este paciente no pertenece al cuidador");
+        if (!patient.getCaregiver().getId().equals(caregiver.getId())) {
+            throw new ForbiddenException("Este patient no pertenece al caregiver");
         }
 
-        return PacienteMapper.toResponsePerfil(paciente);
+        return PacienteMapper.toResponsePerfil(patient);
     }
 
-    private Paciente obtenerPaciente(Long pacienteId) {
+    private Patient obtenerPaciente(Long pacienteId) {
         return pacienteRepository.findById(pacienteId)
-                .orElseThrow(() -> new NotFoundException("Paciente no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Patient no encontrado"));
     }
 
-    private Cuidador obtenerCuidador(String phoneCuidador) {
+    private Caregiver obtenerCuidador(String phoneCuidador) {
         return cuidadorRepository
                 .findByUserPhoneNumber(phoneCuidador)
-                .orElseThrow(() -> new NotFoundException("Cuidador no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Caregiver no encontrado"));
     }
 }
