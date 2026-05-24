@@ -64,17 +64,11 @@ public class MedicinaService {
 
         Cuidador cuidador = user.getCuidador();
 
-        boolean esPacienteVinculado = cuidador.getPacientes().stream()
-                .anyMatch(p -> p.getId().equals(pacienteId));
-
-        if (!esPacienteVinculado) {
-            throw new ForbiddenException("No puedes ver medicinas de un paciente no vinculado");
-        }
-
         Paciente paciente = cuidador.getPacientes().stream()
                 .filter(p -> p.getId().equals(pacienteId))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("Paciente no encontrado"));
+                .orElseThrow(() -> new ForbiddenException(
+                        "No puedes ver medicinas de un paciente no vinculado"));
 
         List<Medicina> medicinas = medicinaRepository.findByPacienteAndEstado(paciente, Estado.ACTIVO);
 
