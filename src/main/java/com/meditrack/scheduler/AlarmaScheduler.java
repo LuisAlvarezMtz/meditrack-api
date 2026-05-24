@@ -1,6 +1,6 @@
 package com.meditrack.scheduler;
 
-import com.meditrack.repository.AlarmaConfigRepository;
+import com.meditrack.repository.AlarmConfigRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,7 +15,7 @@ import java.time.ZoneId;
 @Slf4j
 public class AlarmaScheduler {
 
-    private final AlarmaConfigRepository alarmaRepository;
+    private final AlarmConfigRepository alarmaRepository;
 
     @Scheduled(fixedRate = 60000) // cada 1 minuto
     @Transactional
@@ -24,7 +24,7 @@ public class AlarmaScheduler {
         LocalDateTime ahora = LocalDateTime
                 .now(ZoneId.of("America/Mexico_City"));
 
-        int actualizadas = alarmaRepository.desactivarExpiradas(ahora);
+        int actualizadas = alarmaRepository.deactivateExpired(ahora);
 
         if (actualizadas > 0) {
             log.info("Alarmas desactivadas automáticamente: {}", actualizadas);
@@ -38,7 +38,7 @@ public class AlarmaScheduler {
                 .now(ZoneId.of("America/Mexico_City"))
                 .minusMinutes(5); // ← 5 minutos de gracia
 
-        int omitidas = alarmaRepository.omitirPendientesPasadas(hace5Min);
+        int omitidas = alarmaRepository.omitPastPending(hace5Min);
 
         if (omitidas > 0) {
             log.info("Alarmas marcadas como OMITIDAS automáticamente: {}", omitidas);

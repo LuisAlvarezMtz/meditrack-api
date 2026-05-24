@@ -7,6 +7,7 @@ import com.meditrack.validation.EntityValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.meditrack.model.*;
+import com.meditrack.repository.AlarmRepository;
 import org.springframework.transaction.annotation.Transactional;
 import com.meditrack.mapper.AlarmMapper;
 
@@ -22,7 +23,7 @@ public class AlarmService {
     private final AlarmRepository alarmRepository;
     private final EntityValidator entidadValidator;
 
-    private static final ZoneId ZONA_HORARIA = ZoneId.of("America/Mexico_City");
+    private static final ZoneId TIME_ZONE = ZoneId.of("America/Mexico_City");
 
     @Transactional(readOnly = true)
     public List<AlarmResponseDto> getTodayAlarms(
@@ -32,8 +33,8 @@ public class AlarmService {
         User user = entidadValidator.getUser(phoneNumber);
         Patient patient = entidadValidator.resolvePatient(user, patientId);
 
-        LocalDateTime start = LocalDate.now(ZONA_HORARIA).atStartOfDay();
-        LocalDateTime end = LocalDate.now(ZONA_HORARIA).atTime(23, 59, 59, 999999999);
+        LocalDateTime start = LocalDate.now(TIME_ZONE).atStartOfDay();
+        LocalDateTime end = LocalDate.now(TIME_ZONE).atTime(23, 59, 59, 999999999);
 
         List<Alarm> alarms = alarmRepository.findTodayAlarms(
                 patient.getId(),
@@ -75,12 +76,12 @@ public class AlarmService {
 
         LocalDateTime start = (startDate != null
                 ? startDate
-                : LocalDate.now(ZONA_HORARIA).minusDays(6))
+                : LocalDate.now(TIME_ZONE).minusDays(6))
                 .atStartOfDay();
 
         LocalDateTime end = (endDate != null
                 ? endDate
-                : LocalDate.now(ZONA_HORARIA))
+                : LocalDate.now(TIME_ZONE))
                 .atTime(23, 59, 59, 999999999);
 
         List<Alarm> alarms = alarmRepository.findHistory(

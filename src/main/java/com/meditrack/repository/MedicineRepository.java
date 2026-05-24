@@ -10,8 +10,7 @@ import java.util.List;
 
 
 @Repository
-public interface MedicinaRepository
+public interface MedicineRepository
         extends JpaRepository<Medicine, Long> {
-    List<Medicine> findByPacienteAndEstado(Patient patient, Status status);
+    List<Medicine> findByPatientAndStatus(Patient patient, Status status);
 }
-

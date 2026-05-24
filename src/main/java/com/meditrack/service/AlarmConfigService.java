@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.meditrack.mapper.AlarmConfigMapper;
 import com.meditrack.model.*;
+import com.meditrack.repository.AlarmConfigRepository;
+import com.meditrack.repository.AlarmRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;

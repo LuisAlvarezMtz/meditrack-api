@@ -1,4 +1,4 @@
-    package com.meditrack.repository;
+package com.meditrack.repository;
     
     import com.meditrack.model.Caregiver;
     import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,10 +7,8 @@
     import java.util.Optional;
     
     @Repository
-    public interface CuidadorRepository extends JpaRepository<Caregiver, Long> {
-        Optional<Caregiver> findByCodigoVinculacion(String codigoVinculacion);
+    public interface CaregiverRepository extends JpaRepository<Caregiver, Long> {
+        Optional<Caregiver> findByLinkCode(String linkCode);
         Optional<Caregiver> findByUserPhoneNumber(String phoneNumber);
         Optional<Caregiver> findByUserId(Long userId);
     }
-
-

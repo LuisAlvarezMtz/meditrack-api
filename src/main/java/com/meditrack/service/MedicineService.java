@@ -21,15 +21,15 @@ public class MedicineService {
 
     private final MedicineRepository medicineRepository;
     private final UserRepository userRepository;
-    private final EntityValidator entidadValidator;
+    private final EntityValidator entityValidator;
 
     @Transactional
     public ResponseMedicineDto registerMedicine
             (RequestMedicineDto dto, String phoneNumber) {
 
-        User registeredBy = entidadValidator.getUser(phoneNumber);
+        User registeredBy = entityValidator.getUser(phoneNumber);
 
-        Patient patient = entidadValidator.resolvePatient(registeredBy, dto.getPatientId());
+        Patient patient = entityValidator.resolvePatient(registeredBy, dto.getPatientId());
 
         Medicine medicine = MedicineMapper.toEntity(dto, patient, registeredBy);
         Medicine saved = medicineRepository.save(medicine);
@@ -113,8 +113,8 @@ public class MedicineService {
     }
 
     private void validateAccess(Patient patient, String phoneNumber) {
-        User user = entidadValidator.getUser(phoneNumber);
-        entidadValidator.validateAccess(patient, user);
+        User user = entityValidator.getUser(phoneNumber);
+        entityValidator.validateAccess(patient, user);
     }
 
 }
