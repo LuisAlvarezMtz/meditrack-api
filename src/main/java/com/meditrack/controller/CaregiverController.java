@@ -9,7 +9,7 @@ import com.meditrack.dto.patient.RequestPatientDto;
 import com.meditrack.dto.patient.ResponsePatientDto;
 import com.meditrack.dto.patient.ResponsePatientProfileDto;
 import com.meditrack.dto.patient.UpdatePatientProfileDto;
-import com.meditrack.service.CuidadorService;
+import com.meditrack.service.CaregiverService;
 import com.meditrack.service.JWTService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,23 +20,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/cuidadores")
+@RequestMapping("/caregivers")
 @RequiredArgsConstructor
-public class CuidadorController {
+public class CaregiverController {
 
-    private final CuidadorService cuidadorSrv;
+    private final CaregiverService caregiverService;
     private final JWTService jwtService;
 
-    @PostMapping("/registro")
-    public ResponseEntity<AuthResponseDto> registrar(
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponseDto> register(
             @Valid @RequestBody RequestCaregiverDto dto
     ) {
-        AuthResponseDto response = cuidadorSrv.registrar(dto);
+        AuthResponseDto response = caregiverService.register(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/actualizar")
-    public ResponseEntity<UpdateCaregiverResponseDto> actualizarCuidador(
+    @PutMapping("/update")
+    public ResponseEntity<UpdateCaregiverResponseDto> updateCaregiver(
             @RequestBody UpdateCaregiverDto dto,
             @RequestHeader("Authorization") String token
     ) {
@@ -45,66 +45,66 @@ public class CuidadorController {
         String phoneNumber = jwtService.extractPhoneNumber(jwt);
 
         UpdateCaregiverResponseDto response =
-                cuidadorSrv.actualizarCuidador(phoneNumber, dto);
+                caregiverService.updateCaregiver(phoneNumber, dto);
 
         return ResponseEntity.ok(response);
     }
 
 
-    @GetMapping("/pacientes-del-cuidador")
-    public ResponseEntity<List<ResponsePatientDto>> obtenerPacientesDelCuidador(
+    @GetMapping("/patients")
+    public ResponseEntity<List<ResponsePatientDto>> getCaregiverPatients(
             @RequestHeader("Authorization") String token) {
 
         String jwt = token.replace("Bearer ", "");
         String phoneNumber = jwtService.extractPhoneNumber(jwt);
-        List<ResponsePatientDto> pacientes =
-                cuidadorSrv.obtenerPacientesDeCuidador(phoneNumber);
+        List<ResponsePatientDto> patients =
+                caregiverService.getCaregiverPatients(phoneNumber);
 
-        return ResponseEntity.ok(pacientes);
+        return ResponseEntity.ok(patients);
     }
 
-    @GetMapping("/mis-datos")
-    public ResponseEntity<ResponseCaregiverDto> obtenerMisDatosCuidador(
+    @GetMapping("/my-data")
+    public ResponseEntity<ResponseCaregiverDto> getMyData(
             @RequestHeader("Authorization") String token) {
 
         String jwt = token.replace("Bearer ", "");
         String phoneNumber = jwtService.extractPhoneNumber(jwt);
 
-        ResponseCaregiverDto dto = cuidadorSrv.obtenerMisDatos(phoneNumber);
+        ResponseCaregiverDto dto = caregiverService.getMyData(phoneNumber);
         return ResponseEntity.ok(dto);
     }
 
-    @PostMapping("/registrar-paciente")
-    public ResponseEntity<ResponsePatientDto> registrarPacienteDesdeCuidador(
+    @PostMapping("/register-patient")
+    public ResponseEntity<ResponsePatientDto> registerPatientFromCaregiver(
             @RequestHeader("Authorization") String token,
             @RequestBody RequestPatientDto dto
     ) {
         String jwt = token.replace("Bearer ", "");
         String phoneNumber = jwtService.extractPhoneNumber(jwt);
 
-        ResponsePatientDto paciente =
-                cuidadorSrv.registrarPacienteDesdeCuidador(phoneNumber, dto);
+        ResponsePatientDto patient =
+                caregiverService.registerPatientFromCaregiver(phoneNumber, dto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(paciente);
+        return ResponseEntity.status(HttpStatus.CREATED).body(patient);
     }
 
-    @DeleteMapping("/{id}/desvincular")
-    public ResponseEntity<Void> desvincularPaciente(
+    @DeleteMapping("/{id}/unlink")
+    public ResponseEntity<Void> unlinkPatient(
             @PathVariable Long id,
             @RequestHeader("Authorization") String token) {
 
         String jwt = token.replace("Bearer ", "");
         String phoneNumber = jwtService.extractPhoneNumber(jwt);
 
-        cuidadorSrv.desvincularPaciente(id, phoneNumber);
+        caregiverService.unlinkPatient(id, phoneNumber);
 
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/pacientes/{pacienteId}")
-    public ResponseEntity<ResponsePatientProfileDto> actualizarPaciente(
+    @PutMapping("/patients/{patientId}")
+    public ResponseEntity<ResponsePatientProfileDto> updatePatient(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long pacienteId,
+            @PathVariable Long patientId,
             @RequestBody UpdatePatientProfileDto dto
     ) {
 
@@ -112,8 +112,8 @@ public class CuidadorController {
         String phoneNumber = jwtService.extractPhoneNumber(jwt);
 
         ResponsePatientProfileDto response =
-                cuidadorSrv.actualizarPacienteDesdeCuidador(
-                        pacienteId,
+                caregiverService.updatePatientFromCaregiver(
+                        patientId,
                         phoneNumber,
                         dto
                 );
@@ -121,18 +121,18 @@ public class CuidadorController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/pacientes/{pacienteId}")
-    public ResponseEntity<ResponsePatientProfileDto> obtenerPaciente(
+    @GetMapping("/patients/{patientId}")
+    public ResponseEntity<ResponsePatientProfileDto> getPatient(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long pacienteId
+            @PathVariable Long patientId
     ) {
 
         String jwt = token.replace("Bearer ", "");
         String phoneNumber = jwtService.extractPhoneNumber(jwt);
 
         ResponsePatientProfileDto response =
-                cuidadorSrv.obtenerPacienteDesdeCuidador(
-                        pacienteId,
+                caregiverService.getPatientFromCaregiver(
+                        patientId,
                         phoneNumber
                 );
 

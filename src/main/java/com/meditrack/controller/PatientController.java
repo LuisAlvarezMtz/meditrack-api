@@ -7,7 +7,7 @@ import com.meditrack.dto.patient.ResponsePatientDto;
 import com.meditrack.dto.patient.UpdatePatientProfileDto;
 import com.meditrack.dto.patient.UpdatePatientProfileResponseDto;
 import com.meditrack.service.JWTService;
-import com.meditrack.service.PacienteService;
+import com.meditrack.service.PatientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,23 +18,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/pacientes")
+@RequestMapping("/patients")
 @RequiredArgsConstructor
-public class PacienteController {
+public class PatientController {
 
-    private final PacienteService pacienteSrv;
+    private final PatientService patientService;
     private final JWTService jwtService;
 
-    @PostMapping("/registro")
-    public ResponseEntity<AuthResponseDto> registrar(
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponseDto> register(
             @Valid @RequestBody RequestPatientDto dto
     ) {
-        AuthResponseDto response = pacienteSrv.registrar(dto);
+        AuthResponseDto response = patientService.register(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/perfil")
-    public ResponseEntity<UpdatePatientProfileResponseDto> actualizarPerfil(
+    @PutMapping("/profile")
+    public ResponseEntity<UpdatePatientProfileResponseDto> updateProfile(
             @RequestHeader("Authorization") String token,
             @RequestBody UpdatePatientProfileDto dto
     ) {
@@ -43,61 +43,60 @@ public class PacienteController {
         String phoneNumber = jwtService.extractPhoneNumber(jwt);
 
         return ResponseEntity.ok(
-                pacienteSrv.actualizarPerfilPropio(phoneNumber, dto)
+                patientService.updateOwnProfile(phoneNumber, dto)
         );
     }
 
-    @PostMapping("/cuidador")
-    public ResponseEntity<Map<String, String>> vincularCuidador(
-            @RequestParam String codigo,
+    @PostMapping("/caregiver")
+    public ResponseEntity<Map<String, String>> linkCaregiver(
+            @RequestParam String code,
             Authentication authentication) {
 
         String phoneNumber = authentication.getName();
-        pacienteSrv.vincularCuidador(phoneNumber, codigo);
+        patientService.linkCaregiver(phoneNumber, code);
 
         return ResponseEntity.ok(
-                Map.of("mensaje",
-                        "Patient vinculado correctamente al cuidador"));
+                Map.of("message",
+                        "Patient linked to caregiver successfully"));
     }
 
-    @GetMapping("/cuidador")
-    public ResponseEntity<CaregiverInfoDto> obtenerCuidadorPorCodigo(
-            @RequestParam String codigo) {
+    @GetMapping("/caregiver")
+    public ResponseEntity<CaregiverInfoDto> getCaregiverByCode(
+            @RequestParam String code) {
 
         return ResponseEntity.ok(
-                pacienteSrv.buscarCuidadorPorCodigo(codigo)
+                patientService.findCaregiverByCode(code)
         );
     }
 
-    @DeleteMapping("/cuidador")
+    @DeleteMapping("/caregiver")
     public ResponseEntity<Map<String, String>>
-    desvincularCuidador(Authentication authentication) {
+    unlinkCaregiver(Authentication authentication) {
         String phoneNumber = authentication.getName();
-        pacienteSrv.desvincularCuidador(phoneNumber);
+        patientService.unlinkCaregiver(phoneNumber);
 
         return ResponseEntity.ok
-                (Map.of("mensaje", "Caregiver " +
-                        "desvinculado correctamente"));
+                (Map.of("message", "Caregiver unlinked successfully"));
     }
 
-    @GetMapping("/perfil")
-    public ResponseEntity<ResponsePatientDto> obtenerMisDatos
+    @GetMapping("/profile")
+    public ResponseEntity<ResponsePatientDto> getMyData
             (Authentication authentication) {
         String phoneNumber = authentication.getName();
 
-        ResponsePatientDto response = pacienteSrv.obtenerPerfil(phoneNumber);
+        ResponsePatientDto response = patientService.getProfile(phoneNumber);
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/cambiar-cuidador")
-    public ResponseEntity<Map<String, String>> cambiarCuidador(
-            @RequestParam String nuevoCodigo,
+    @PutMapping("/change-caregiver")
+    public ResponseEntity<Map<String, String>> changeCaregiver(
+            @RequestParam String newCode,
             Authentication authentication) {
 
         String phoneNumber = authentication.getName();
-        pacienteSrv.cambiarCuidador(phoneNumber, nuevoCodigo);
+        patientService.changeCaregiver(phoneNumber, newCode);
 
         return ResponseEntity.ok
-                (Map.of("mensaje", "Caregiver actualizado correctamente"));
+                (Map.of("message", "Caregiver updated successfully"));
     }
 }
