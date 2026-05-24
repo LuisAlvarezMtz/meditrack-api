@@ -9,11 +9,11 @@ import com.meditrack.repository.MedicinaRepository;
 import com.meditrack.repository.PacienteRepository;
 import com.meditrack.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class EntidadValidator {
 
@@ -41,7 +41,7 @@ public class EntidadValidator {
                 .orElseThrow(() -> new NotFoundException("Medicina no encontrada"));
 
         if (!medicina.getPaciente().getId().equals(paciente.getId())) {
-            throw new ForbiddenException("No autorizado");
+            throw new ForbiddenException("No tienes acceso a esta medicina");
         }
 
         return medicina;
@@ -56,7 +56,7 @@ public class EntidadValidator {
 
         if (user.getRol() == Rol.PACIENTE) {
             if (!paciente.getUser().getId().equals(user.getId())) {
-                throw new ForbiddenException("No autorizado");
+                throw new ForbiddenException("No tienes acceso a esta configuración");
             }
         }
 
