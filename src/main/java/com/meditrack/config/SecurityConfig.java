@@ -45,9 +45,9 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
 
-                        // Públicos
-                        .requestMatchers(HttpMethod.POST, "/pacientes/registro").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/cuidadores/registro").permitAll()
+                        // public endpoints
+                        .requestMatchers(HttpMethod.POST, "/patients/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/caregiver/register").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ping").permitAll()
@@ -60,7 +60,7 @@ public class SecurityConfig {
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());
                             response.setContentType("application/json;charset=UTF-8");
                             response.getWriter().write(
-                                    "{\"error\":\"No autorizado\",\"status\":401}"
+                                    "{\"error\":\"Unauthorized\",\"status\":401}"
                             );
                         })
                 )

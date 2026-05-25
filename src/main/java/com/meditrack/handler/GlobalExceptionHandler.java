@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
             BadCredentialsException ex) {
 
         Map<String, Object> response = Map.of(
-                "error", "Teléfono o contraseña incorrectos",
+                "error", "Incorrect phone number or password",
                 "status", HttpStatus.UNAUTHORIZED.value(),
                 "timestamp", LocalDateTime.now()
         );
@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
             org.springframework.security.core.AuthenticationException ex) {
 
         Map<String, Object> response = Map.of(
-                "error", "Error de autenticación",
+                "error",  "Authentication error",
                 "status", HttpStatus.UNAUTHORIZED.value(),
                 "timestamp", LocalDateTime.now()
         );
@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
 
         String message = ex.getReason() != null
                 ? ex.getReason()
-                : "Error inesperado";
+                : "Unexpected error";
 
         Map<String, Object> response = Map.of(
                 "error", message,
@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
         );
 
         Map<String, Object> response = Map.of(
-                "error", "Errores de validación",
+                "error", "Validation errors",
                 "errors", errores,
                 "status", HttpStatus.BAD_REQUEST.value(),
                 "timestamp", LocalDateTime.now()
@@ -88,7 +88,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
         Map<String, Object> response = Map.of(
-                "error", "Error interno del servidor",
+                "error",  "Internal server error",
                 "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "timestamp", LocalDateTime.now()
         );
