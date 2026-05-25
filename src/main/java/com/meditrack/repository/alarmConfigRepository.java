@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface AlarmConfigRepository extends JpaRepository<AlarmConfig, Long> {
+public interface alarmConfigRepository extends JpaRepository<AlarmConfig, Long> {
     @Query("""
     SELECT a FROM AlarmConfig a
     WHERE a.patient.id = :patientId

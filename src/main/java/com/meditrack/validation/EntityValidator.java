@@ -4,7 +4,7 @@ import com.meditrack.exception.BadRequestException;
 import com.meditrack.exception.ForbiddenException;
 import com.meditrack.exception.NotFoundException;
 import com.meditrack.model.*;
-import com.meditrack.repository.AlarmConfigRepository;
+import com.meditrack.repository.alarmConfigRepository;
 import com.meditrack.repository.MedicineRepository;
 import com.meditrack.repository.PatientRepository;
 import com.meditrack.repository.UserRepository;
@@ -19,7 +19,7 @@ public class EntityValidator {
 
     private final UserRepository userRepository;
     private final MedicineRepository medicineRepository;
-    private final AlarmConfigRepository alarmConfigRepository;
+    private final alarmConfigRepository alarmConfigRepository;
     private final PatientRepository patientRepository;
 
     public User getUser(String phoneNumber) {

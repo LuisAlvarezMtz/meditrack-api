@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.meditrack.mapper.AlarmConfigMapper;
 import com.meditrack.model.*;
-import com.meditrack.repository.AlarmConfigRepository;
+import com.meditrack.repository.alarmConfigRepository;
 import com.meditrack.repository.AlarmRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AlarmConfigService {
 
-    private final AlarmConfigRepository alarmConfigRepository;
+    private final alarmConfigRepository alarmConfigRepository;
     private final AlarmRepository alarmRepository;
     private final EntityValidator entidadValidator;
     private final DtoValidator dtoValidator;
@@ -43,7 +43,7 @@ public class AlarmConfigService {
 
         LocalDateTime now = LocalDateTime.now(TIME_ZONE);
 
-        dtoValidator.validarDto(dto);
+        dtoValidator.validate(dto);
 
         User user = entidadValidator.getUser(phoneNumber);
 
@@ -155,7 +155,7 @@ public class AlarmConfigService {
     ) {
 
         LocalDateTime now = LocalDateTime.now(TIME_ZONE);
-        dtoValidator.validarDto(dto);
+        dtoValidator.validate(dto);
 
         User user = entidadValidator.getUser(phoneNumber);
         AlarmConfig config = entidadValidator.validateConfig(configId, user);

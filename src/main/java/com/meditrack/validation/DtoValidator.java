@@ -10,42 +10,42 @@ import java.time.ZoneId;
 @Component
 public class DtoValidator {
 
-    private static final ZoneId ZONA = ZoneId.of("America/Mexico_City");
+    private static final ZoneId TIME_ZONE = ZoneId.of("America/Mexico_City");
 
-    public void validarDto(AlarmConfigRequestDto dto) {
-        validarFechas(dto);
-        validarFrecuencia(dto);
-        validarFechaInicioNoPasada(dto.getStartDate());
+    public void validate(AlarmConfigRequestDto dto) {
+        validateDates(dto);
+        validateFrequency(dto);
+        validateStartDateNotInPast(dto.getStartDate());
     }
 
-    private void validarFechas(AlarmConfigRequestDto dto) {
+    private void validateDates(AlarmConfigRequestDto dto) {
         if (dto.getEndDate().isBefore(dto.getStartDate())) {
-            throw new BadRequestException("Fecha fin no puede ser menor a la fecha de inicio");
+            throw new BadRequestException( "End date cannot be before start date");
         }
     }
 
-    private void validarFrecuencia(AlarmConfigRequestDto dto) {
+    private void validateFrequency(AlarmConfigRequestDto dto) {
         if (dto.getFrequencyHours() <= 0) {
-            throw new BadRequestException("Frecuencia inválida");
+            throw new BadRequestException( "Invalid frequency");
         }
 
         if (dto.getFrequencyHours() > 24) {
-            throw new BadRequestException("Frecuencia demasiado alta");
+            throw new BadRequestException("Frequency too high");
         }
 
     }
 
-    private void validarFechaInicioNoPasada(LocalDateTime fechaInicio) {
-        LocalDateTime ahora = LocalDateTime.now(ZONA)
+    private void validateStartDateNotInPast(LocalDateTime startDate) {
+        LocalDateTime now = LocalDateTime.now(TIME_ZONE)
                 .withSecond(0)
                 .withNano(0);
 
-        LocalDateTime inicio = fechaInicio
+        LocalDateTime start = startDate
                 .withSecond(0)
                 .withNano(0);
 
-        if (inicio.isBefore(ahora.minusSeconds(10))) {
-            throw new BadRequestException("La fecha y hora de inicio no puede ser menor a la actual");
+        if (start.isBefore(now.minusSeconds(10))) {
+            throw new BadRequestException("Start date and time cannot be in the past");
         }
     }
 
