@@ -27,15 +27,6 @@ public class EntityValidator {
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
-    public Patient getPatient(String phoneNumber) {
-        User user = getUser(phoneNumber);
-
-        if (user.getRole() != Role.PATIENT) {
-            throw new ForbiddenException("Only patients can perform this action");
-        }
-        return user.getPatient();
-    }
-
     public Medicine validateMedicine(Long medicineId, Patient patient) {
         Medicine medicine = medicineRepository.findById(medicineId)
                 .orElseThrow(() -> new NotFoundException("Medicine not found"));

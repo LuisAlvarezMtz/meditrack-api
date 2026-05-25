@@ -29,7 +29,7 @@ public class UserController {
         try {
             String newAccessToken = userService.refreshAccessToken(refreshToken);
             return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", e.getMessage()));
         }

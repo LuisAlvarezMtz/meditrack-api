@@ -15,21 +15,21 @@ public class DtoValidator {
     public void validarDto(AlarmConfigRequestDto dto) {
         validarFechas(dto);
         validarFrecuencia(dto);
-        validarFechaInicioNoPasada(dto.getFechaInicio());
+        validarFechaInicioNoPasada(dto.getStartDate());
     }
 
     private void validarFechas(AlarmConfigRequestDto dto) {
-        if (dto.getFechaFin().isBefore(dto.getFechaInicio())) {
+        if (dto.getEndDate().isBefore(dto.getStartDate())) {
             throw new BadRequestException("Fecha fin no puede ser menor a la fecha de inicio");
         }
     }
 
     private void validarFrecuencia(AlarmConfigRequestDto dto) {
-        if (dto.getFrecuenciaHoras() <= 0) {
+        if (dto.getFrequencyHours() <= 0) {
             throw new BadRequestException("Frecuencia inválida");
         }
 
-        if (dto.getFrecuenciaHoras() > 24) {
+        if (dto.getFrequencyHours() > 24) {
             throw new BadRequestException("Frecuencia demasiado alta");
         }
 
