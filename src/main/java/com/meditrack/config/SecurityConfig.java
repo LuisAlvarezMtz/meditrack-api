@@ -47,7 +47,7 @@ public class SecurityConfig {
 
                         // public endpoints
                         .requestMatchers(HttpMethod.POST, "/patients/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/caregiver/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/caregivers/register").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ping").permitAll()
